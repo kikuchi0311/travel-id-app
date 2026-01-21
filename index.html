@@ -73,7 +73,15 @@
         h1 { font-size: 24px; margin-bottom: 10px; font-weight: 800; margin-top: 10px; }
         h2 { font-size: 16px; color: #64748b; margin-bottom: 30px; font-weight: normal; }
         
-        .app-logo { display: block; margin: 20px auto; width: 140px; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        /* ★ロゴ画像のスタイル修正版★ */
+        .app-logo {
+            display: block;
+            margin: 30px auto;
+            width: 240px; /* ここを大きくしました */
+            max-width: 70%; /* スマホではみ出さないように */
+            height: auto;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
 
         /* Quiz UI */
         .options-list { text-align: left; display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
@@ -154,7 +162,7 @@
         <h2 id="start-subtitle">あなたの旅のスタイルを<br>13問で解明します。</h2>
         <img src="./images/logo.png" alt="Travel ID Logo" class="app-logo">
         <button class="start-btn" onclick="startQuiz()" id="start-btn-text">診断を始める</button>
-        <p style="font-size: 12px; color: #94a3b8; margin-top: 30px;">Ver 12.0: Match & Balance</p>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 30px;">Ver 12.1: New Logo & Match</p>
     </div>
 
     <div id="quiz-screen" class="hidden">
