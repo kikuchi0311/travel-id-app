@@ -18,7 +18,6 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://travel-id-lab.github.io/travel-id-app/">
     <meta property="og:image" content="https://travel-id-lab.github.io/travel-id-app/images/泥攻孤遊.png">
-    
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://travel-id-lab.github.io/travel-id-app/images/泥攻孤遊.png">
 
@@ -79,121 +78,57 @@
         h1 { font-size: 24px; margin-bottom: 10px; font-weight: 800; margin-top: 10px; }
         h2 { font-size: 16px; color: #64748b; margin-bottom: 30px; font-weight: normal; }
         
+        /* MBTI Screen Styles */
+        .mbti-container { margin: 20px 0; text-align: left; }
+        .mbti-label { font-size: 14px; font-weight: bold; color: #64748b; margin-bottom: 8px; display: block; }
+        select.mbti-select { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #e2e8f0; border-radius: 12px; background-color: #f8fafc; color: var(--text); cursor: pointer; font-weight: bold; }
+        select.mbti-select:focus { outline: none; border-color: var(--primary); }
+        .pre-result-msg { font-size: 15px; color: #475569; margin-bottom: 25px; }
+
         .question-text {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            min-height: 72px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 18px; font-weight: 700; margin-bottom: 30px; min-height: 72px; display: flex; align-items: center; justify-content: center;
         }
 
         .btn-group { display: flex; flex-direction: column; gap: 12px; }
 
         button {
-            padding: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            background: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-            color: var(--text);
+            padding: 16px; border: 2px solid #e2e8f0; border-radius: 16px; background: white; font-size: 16px; cursor: pointer; transition: all 0.2s; font-weight: 600; color: var(--text);
         }
+        button:hover:not(:disabled) { background-color: #f1f5f9; border-color: var(--primary); }
 
-        button:hover:not(:disabled) {
-            background-color: #f1f5f9;
-            border-color: var(--primary);
+        button.start-btn, button.result-btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; border: none; font-size: 20px; padding: 20px 40px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); width: 100%; margin-top: 20px;
         }
-
-        button.start-btn {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white;
-            border: none;
-            font-size: 20px;
-            padding: 20px 40px;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-        }
-        button.start-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        button.start-btn:hover, button.result-btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
         /* Share Buttons */
-        .share-area {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        button.share-btn {
-            color: white;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-weight: bold;
-            width: 100%;
-            margin: 0;
-        }
-        
-        button.share-btn.x {
-            background-color: var(--x-color);
-        }
+        .share-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        button.share-btn { color: white; border: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold; width: 100%; margin: 0; }
+        button.share-btn.x { background-color: var(--x-color); }
         button.share-btn.x:hover { opacity: 0.8; transform: translateY(-2px); background-color: #333; }
-
-        button.share-btn.discord {
-            background-color: var(--discord-color);
-        }
+        button.share-btn.discord { background-color: var(--discord-color); }
         button.share-btn.discord:hover { opacity: 0.8; transform: translateY(-2px); background-color: #4752C4; }
 
-        .discord-msg {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 5px;
-            line-height: 1.4;
-            background: #f1f5f9;
-            padding: 10px;
-            border-radius: 8px;
-        }
+        .discord-msg { font-size: 12px; color: #64748b; margin-top: 5px; line-height: 1.4; background: #f1f5f9; padding: 10px; border-radius: 8px; }
 
         /* Result Styles */
-        .image-container {
-            width: 100%; height: 250px; border-radius: 16px; overflow: hidden; margin-bottom: 20px;
-            background-color: #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+        .image-container { width: 100%; height: 250px; border-radius: 16px; overflow: hidden; margin-bottom: 20px; background-color: #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .result-img { width: 100%; height: 100%; object-fit: cover; }
         .result-type-title { font-size: 18px; font-weight: bold; color: var(--primary); margin-bottom: 5px; }
-        .result-id {
-            font-size: 42px; font-weight: 900; letter-spacing: 4px; margin: 0 0 20px 0;
-            background: linear-gradient(45deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;
-        }
+        .result-id { font-size: 42px; font-weight: 900; letter-spacing: 4px; margin: 0 0 20px 0; background: linear-gradient(45deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2; }
         
-        .rare-banner {
-            background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
-            background-size: 200% 200%;
-            color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 25px;
-            font-weight: 900; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); border: 3px solid #fff;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-            animation: rareGlow 2s infinite alternate, gradientMove 3s ease infinite;
-        }
+        .rare-banner { background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700); background-size: 200% 200%; color: #fff; padding: 15px; border-radius: 12px; margin-bottom: 25px; font-weight: 900; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); border: 3px solid #fff; box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); animation: rareGlow 2s infinite alternate, gradientMove 3s ease infinite; }
         @keyframes rareGlow { from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); transform: scale(1); } to { box-shadow: 0 0 25px rgba(255, 215, 0, 0.9); transform: scale(1.02); } }
         @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .rare-star { color: #fff; font-size: 1.3em; margin: 0 5px; }
         .rare-title { font-size: 22px; margin-top: 5px; letter-spacing: 2px; }
 
-        .info-box {
-            background: #f1f5f9; border-radius: 16px; padding: 20px; text-align: left; margin-bottom: 15px; border: 1px solid #e2e8f0;
-        }
+        .info-box { background: #f1f5f9; border-radius: 16px; padding: 20px; text-align: left; margin-bottom: 15px; border: 1px solid #e2e8f0; }
         .info-title { font-size: 12px; font-weight: bold; color: #64748b; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
         .info-content { font-size: 16px; font-weight: bold; color: #334155; }
         .match-tag { display: inline-block; background: linear-gradient(135deg, #f472b6, #db2777); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-top: 5px; }
 
-        .neutral-advice-box {
-            margin-top: 10px; padding: 10px; background-color: rgba(255, 255, 255, 0.6);
-            border-radius: 8px; font-size: 12px; color: #831843; border-left: 3px solid #db2777; display: none;
-        }
+        .neutral-advice-box { margin-top: 10px; padding: 10px; background-color: rgba(255, 255, 255, 0.6); border-radius: 8px; font-size: 12px; color: #831843; border-left: 3px solid #db2777; display: none; }
 
         .result-description { text-align: left; font-size: 15px; color: #475569; margin-bottom: 30px; line-height: 1.8; }
 
@@ -201,12 +136,7 @@
         .axis-row { margin-bottom: 25px; }
         .axis-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #94a3b8; }
         .bar-bg { height: 10px; background: #e2e8f0; border-radius: 5px; position: relative; }
-        .dot {
-            width: 18px; height: 18px; background: white; border: 4px solid var(--primary);
-            border-radius: 50%; position: absolute; top: 50%;
-            transform: translate(-50%, -50%); transition: left 1s cubic-bezier(0.34, 1.56, 0.64, 1);
-            left: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
+        .dot { width: 18px; height: 18px; background: white; border: 4px solid var(--primary); border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); transition: left 1s cubic-bezier(0.34, 1.56, 0.64, 1); left: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
         .progress-bar { height: 6px; background: #e2e8f0; margin-bottom: 20px; border-radius: 3px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
@@ -224,14 +154,47 @@
         <h1 id="start-title">Travel ID 診断</h1>
         <h2 id="start-subtitle">あなたの旅のスタイルを<br>13問で解明します。</h2>
         <div style="margin: 20px auto; width: 120px; height: 120px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px;">✈️</div>
+        
         <button class="start-btn" onclick="startQuiz()" id="start-btn-text">診断を始める</button>
-        <p style="font-size: 12px; color: #94a3b8; margin-top: 30px;">Global Edition</p>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 30px;">Global Edition + MBTI</p>
     </div>
 
     <div id="quiz-screen" class="hidden">
         <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
         <div class="question-text" id="question-text">Loading...</div>
         <div class="btn-group" id="options-container"></div>
+    </div>
+
+    <div id="pre-result-screen" class="hidden fade-in">
+        <h1 id="pre-title">診断完了！</h1>
+        <p class="pre-result-msg" id="pre-subtitle">
+            最後の仕上げです。<br>MBTI（16タイプ診断）の結果を追加すると、より高精度な分析ができます。
+        </p>
+
+        <div class="mbti-container">
+            <label class="mbti-label" id="mbti-label-text">MBTIを選択 (任意/Optional):</label>
+            <select id="mbti-select" class="mbti-select">
+                <option value="">わからない / スキップ</option>
+                <option value="INTJ">INTJ (建築家)</option>
+                <option value="INTP">INTP (論理学者)</option>
+                <option value="ENTJ">ENTJ (指揮官)</option>
+                <option value="ENTP">ENTP (討論者)</option>
+                <option value="INFJ">INFJ (提唱者)</option>
+                <option value="INFP">INFP (仲介者)</option>
+                <option value="ENFJ">ENFJ (主人公)</option>
+                <option value="ENFP">ENFP (広報運動家)</option>
+                <option value="ISTJ">ISTJ (管理者)</option>
+                <option value="ISFJ">ISFJ (擁護者)</option>
+                <option value="ESTJ">ESTJ (幹部)</option>
+                <option value="ESFJ">ESFJ (領事)</option>
+                <option value="ISTP">ISTP (巨匠)</option>
+                <option value="ISFP">ISFP (冒険家)</option>
+                <option value="ESTP">ESTP (起業家)</option>
+                <option value="ESFP">ESFP (エンターテイナー)</option>
+            </select>
+        </div>
+
+        <button class="result-btn" onclick="calcAndShowResults()" id="show-result-btn-text">結果を見る</button>
     </div>
 
     <div id="result-screen" class="hidden fade-in">
@@ -322,7 +285,11 @@
             axes: { clean: "清潔・快適 (浄)", mud: "混沌・ディープ (泥)", safe: "安全・リラックス (安)", active: "挑戦・アクティブ (攻)", solo: "ソロ・内省 (孤)", social: "交流・ワイワイ (共)", order: "規律・計画的 (律)", flow: "柔軟・行き当たりばったり (遊)" },
             rareMud: "究極のサバイバー", rareClean: "至高の聖域の住人",
             neutralAdvice: "💡 ワンポイント:<br>あなたは「衛生観念」の数値が平均に近いため、柔軟性があります。<br>相手も極端な潔癖・不潔でなければ<strong>【$1】</strong>タイプの人でも、意外と許容できるかもしれません！",
-            cleanName: "浄（Clean）", mudName: "泥（Mud）"
+            cleanName: "浄（Clean）", mudName: "泥（Mud）",
+            preTitle: "診断完了！",
+            preSubtitle: "最後の仕上げです。<br>MBTI（16タイプ診断）の結果を追加すると、より高精度な分析ができます。",
+            mbtiLabel: "MBTIを選択 (任意):",
+            showResultBtn: "結果を見る"
         },
         en: {
             title: "Travel ID Diagnosis",
@@ -340,7 +307,11 @@
             axes: { clean: "Clean & Comfort", mud: "Deep & Chaos", safe: "Safe & Relax", active: "Challenge & Active", solo: "Solo & Inner", social: "Social & Party", order: "Planned & Order", flow: "Flexible & Flow" },
             rareMud: "The Ultimate Survivor", rareClean: "Sanctuary Dweller",
             neutralAdvice: "💡 Tip:<br>Your hygiene standards are flexible.<br>Unless they are extreme, you might get along well with <strong>[$1]</strong> types!",
-            cleanName: "Clean", mudName: "Deep"
+            cleanName: "Clean", mudName: "Deep",
+            preTitle: "Diagnosis Complete!",
+            preSubtitle: "Final step.<br>Adding your MBTI (16 personalities) result will make the analysis more accurate.",
+            mbtiLabel: "Select MBTI (Optional):",
+            showResultBtn: "See Results"
         }
     };
 
@@ -501,11 +472,13 @@
         
         // 画面の状態に合わせて再描画
         if (!document.getElementById('start-screen').classList.contains('hidden')) {
-            // スタート画面
+            // Start Screen
         } else if (!document.getElementById('quiz-screen').classList.contains('hidden')) {
             renderQuestion();
+        } else if (!document.getElementById('pre-result-screen').classList.contains('hidden')) {
+            // Pre-Result Screen
         } else {
-            showResults(); // 結果画面も言語更新
+            showResults(); 
         }
     }
 
@@ -523,6 +496,12 @@
         document.getElementById('text-match-desc').innerText = t.textMatchDesc;
         document.getElementById('label-score').innerText = t.labelScore;
         document.getElementById('btn-top').innerText = t.btnTop;
+        
+        // Pre-Result Screen Texts
+        document.getElementById('pre-title').innerText = t.preTitle;
+        document.getElementById('pre-subtitle').innerHTML = t.preSubtitle;
+        document.getElementById('mbti-label-text').innerText = t.mbtiLabel;
+        document.getElementById('show-result-btn-text').innerText = t.showResultBtn;
         
         document.getElementById('axis-clean').innerText = t.axes.clean;
         document.getElementById('axis-mud').innerText = t.axes.mud;
@@ -557,15 +536,49 @@
     }
 
     function handleAnswer(option, question) {
+        // スコア加算
         if (option.type === 'pos') { for (const [key, val] of Object.entries(question.pos)) scores[key] += val * option.weight; }
         else if (option.type === 'neg') { for (const [key, val] of Object.entries(question.neg)) scores[key] += val * option.weight; }
         
         currentQIndex++;
-        if (currentQIndex < questions.length) renderQuestion(); else showResults();
+        
+        // 最後の質問が終わったら、プレリザルト画面へ
+        if (currentQIndex < questions.length) {
+            renderQuestion();
+        } else {
+            showPreResultScreen();
+        }
+    }
+
+    function showPreResultScreen() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('pre-result-screen').classList.remove('hidden');
+    }
+
+    function calcAndShowResults() {
+        // MBTIボーナスの適用
+        const mbti = document.getElementById('mbti-select').value;
+        if (mbti && mbti.length === 4) {
+            // E vs I
+            if (mbti[0] === 'E') scores.social += 2;
+            else if (mbti[0] === 'I') scores.solo += 2;
+            
+            // S vs N
+            if (mbti[1] === 'S') scores.clean += 2;
+            else if (mbti[1] === 'N') scores.mud += 2;
+            
+            // T vs F (今回は簡単のためスコアへの影響は少なめに、または無視)
+            
+            // J vs P
+            if (mbti[3] === 'J') scores.order += 2;
+            else if (mbti[3] === 'P') scores.flow += 2;
+        }
+
+        document.getElementById('pre-result-screen').classList.add('hidden');
+        showResults();
     }
 
     function showResults() {
-        document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
 
         const axis1 = scores.mud - scores.clean;
@@ -573,8 +586,7 @@
         const axis3 = scores.social - scores.solo;
         const axis4 = scores.flow - scores.order;
         
-        // ID生成（ロジックは常に漢字ベースで行う）
-        if (!finalId) { // 初回のみ計算
+        if (!finalId) { 
             finalId = "";
             finalId += axis1 > 0 ? "泥" : "浄";
             finalId += axis2 > 0 ? "攻" : "安";
@@ -583,7 +595,7 @@
         }
 
         const t = translations[currentLang];
-        const data = resultData[finalId][currentLang]; // 言語に応じたデータを取得
+        const data = resultData[finalId][currentLang];
 
         document.getElementById('result-kanji').innerText = `【${finalId}】`;
         document.getElementById('result-title').innerText = data.title;
@@ -591,10 +603,8 @@
         document.getElementById('result-rec').innerText = data.rec;
         document.getElementById('result-item').innerText = data.item;
         
-        // 修正済みのMatch表示
         document.getElementById('result-match').innerText = `Best Match: 【${data.match}】`;
         
-        // レア演出
         const rareBanner = document.getElementById('rare-banner');
         rareBanner.classList.add('hidden'); 
         rareBanner.innerHTML = '';
@@ -607,7 +617,6 @@
             rareBanner.classList.remove('hidden');
         }
 
-        // 隠れ中立
         const adviceBox = document.getElementById('neutral-advice');
         adviceBox.style.display = 'none';
         if (Math.abs(axis1) <= 4) {
@@ -618,7 +627,7 @@
 
         document.getElementById('result-image').src = `./images/${finalId}.png`;
 
-        const maxScore = 15; 
+        const maxScore = 15; // MBTIボーナス込みで少し超える可能性あるが許容範囲
         const setDot = (elementId, netScore) => {
             let val = Math.max(-maxScore, Math.min(maxScore, netScore));
             let percent = ((val + maxScore) / (maxScore * 2)) * 100;
@@ -637,22 +646,16 @@
         if (axis1 >= 6) rareText = `【${t.rareMud}】\n`;
         else if (axis1 <= -7) rareText = `【${t.rareClean}】\n`;
 
-        // 英語の時は英語でシェア
         const text = `${rareText}${currentLang === 'ja' ? '私のTravel IDは' : 'My Travel ID is'}【${finalId}】\n${data.title}\n#TravelID\n`;
-        
         const url = window.location.href;
         const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
         window.open(shareUrl, '_blank');
     }
 
-    // Discord用のコピー機能
     function copyForDiscord() {
         const t = translations[currentLang];
         const data = resultData[finalId][currentLang];
-        
-        // メンションIDを英語と日本語で共通の @kitsukuu. にする
         const text = `${currentLang === 'ja' ? '私のTravel IDは' : 'My Travel ID is'}【${finalId}】\n${data.title}\n@kitsukuu. \n${window.location.href}`;
-        
         navigator.clipboard.writeText(text).then(function() {
             alert(currentLang === 'ja' ? "コピーしました！Discordに貼り付けてね！" : "Copied! Paste it to Discord!");
         }, function(err) {
