@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel ID - 最終完成版</title>
+    <title>Travel ID - 診断結果をシェアしよう</title>
+    <meta property="og:title" content="Travel ID 診断">
+    <meta property="og:description" content="あなたの旅のスタイルを13問で解明します。">
+    <meta property="og:type" content="website">
     <style>
         :root {
             --primary: #3b82f6;
             --bg: #f8fafc;
             --card: #ffffff;
             --text: #1e293b;
+            --x-color: #000000; /* Xのブランドカラー */
         }
 
         body {
@@ -79,6 +83,24 @@
         }
         button.start-btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
+        /* Share Button Style */
+        button.share-btn {
+            background-color: var(--x-color);
+            color: white;
+            border: none;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+        button.share-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+            background-color: #333;
+        }
+
         /* Result & Image Styles */
         .image-container {
             width: 100%; height: 250px; border-radius: 16px; overflow: hidden; margin-bottom: 20px;
@@ -119,7 +141,7 @@
         <h2>あなたの旅のスタイルを<br>13問で解明します。</h2>
         <div style="margin: 20px auto; width: 120px; height: 120px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px;">✈️</div>
         <button class="start-btn" onclick="startQuiz()">診断を始める</button>
-        <p style="font-size: 12px; color: #94a3b8; margin-top: 30px;">Final Version</p>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 30px;">Ver 2.0 (Share Enabled)</p>
     </div>
 
     <div id="quiz-screen" class="hidden">
@@ -135,6 +157,12 @@
         
         <div class="result-type-title" id="result-title"></div>
         <div class="result-id" id="result-kanji"></div>
+        
+        <button class="share-btn" onclick="shareOnX()">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Xで結果をポスト
+        </button>
+
         <div class="result-description" id="result-desc-text"></div>
 
         <div class="spectrum-container">
@@ -161,7 +189,7 @@
 </div>
 
 <script>
-    // 1. Result Data (DataBase)
+    // 1. Result Data
     const resultData = {
         "泥攻孤遊": { title: "孤高のハードコア冒険家", desc: "最も過酷な環境を愛するタイプ。計画は一切立てず、その日の直感と出会いに身を任せる。快適さよりも「生の実感」を求め、誰も行かない場所へ一人で踏み込むことに至上の喜びを感じる。" },
         "泥攻孤律": { title: "ストイックな探検家", desc: "過酷な目標（例：未踏峰制覇）のために、綿密な準備とトレーニングを欠かさない。楽しみのための旅ではなく「ミッション」としての旅を好む。孤独には強いが、想定外のトラブルには脆い一面も。" },
@@ -181,63 +209,23 @@
         "浄安共律": { title: "王道のパッケージツアー客", desc: "大手旅行会社の添乗員付きツアーを好む。移動、食事、宿泊、全てがお膳立てされた安全・安心・清潔な旅こそが至高。自分で調べる手間を嫌い、プロに任せたいタイプ。" }
     };
 
-    // 2. Updated Question List (Unified Agree/Disagree style)
+    // 2. Questions
     const questions = [
-        { 
-            text: "絶景や一生に一度の体験のためなら、シャワーがなく衛生状態が悪い宿でも数日は我慢できる。", 
-            pos: { mud: 2, active: 1 }, neg: { clean: 2, safe: 1 } 
-        },
-        { 
-            text: "旅行のスケジュールは、分刻みで決めるよりも「その場の気分」で決める余白を多く残したい。", 
-            pos: { flow: 2, safe: 0.5 }, neg: { order: 2, active: 0.5 } 
-        },
-        { 
-            text: "安全なリゾート地よりも、少し危険な匂いのする路地裏や、地図にない場所の方にワクワクする。", 
-            pos: { active: 2, mud: 1 }, neg: { safe: 2, clean: 1 } 
-        },
-        { 
-            text: "旅先での食事は、個室でゆっくりよりも、現地の人と相席になるような賑やかな場所が好きだ。", 
-            pos: { social: 2, mud: 0.5 }, neg: { solo: 2, clean: 0.5 } 
-        },
-        { 
-            text: "電車の運休などで予定が完全に崩れた時、パニックになるよりも「面白い展開になった」と感じる。", 
-            pos: { flow: 2, active: 1 }, neg: { order: 2, safe: 1 }
-        },
-        { 
-            text: "言葉が全く通じない場所で、ジェスチャーだけで交渉するのは（怖さよりも）むしろ楽しい。", 
-            pos: { active: 2, social: 1 }, neg: { safe: 2, solo: 1 }
-        },
-        { 
-            text: "もし予算が余ったら、高級ホテルの部屋代よりも、アクティビティや現地体験にお金を使いたい。", 
-            pos: { active: 2, mud: 0.5 }, neg: { clean: 2, safe: 0.5 }
-        },
-        { 
-            text: "丸一日誰とも話さず、ネットも繋がらない大自然の中で一人きり。それは自分にとって「至福の時間」だ。", 
-            pos: { solo: 2, mud: 1 }, neg: { social: 2, safe: 1 }
-        },
-        { 
-            text: "見たことのない「謎の屋台料理（衛生面は怪しい）」があったら、迷わず挑戦して食べる。", 
-            pos: { mud: 2, active: 1 }, neg: { clean: 2, safe: 1 }
-        },
-        { 
-            text: "旅の目的は「癒やし」よりも「価値観を壊されるような刺激」であるべきだ。", 
-            pos: { active: 2, flow: 1 }, neg: { safe: 2, order: 1 } 
-        },
-        { 
-            text: "一緒に行くなら、自分に合わせてくれる人より、振り回してでも新しい世界を見せてくれる人がいい。", 
-            pos: { flow: 2, social: 1 }, neg: { order: 2, solo: 1 } 
-        },
-        { 
-            text: "荷造りでは「もしも」を考えて、あれこれ荷物を持っていく方だ（心配性である）。", 
-            pos: { order: 2, safe: 1 }, neg: { flow: 2, mud: 1 }
-        },
-        { 
-            text: "毎朝の起床時間やルーティンは、旅先でも崩さずに守りたい。", 
-            pos: { order: 2, clean: 0.5 }, neg: { flow: 2, active: 0.5 } 
-        }
+        { text: "絶景や一生に一度の体験のためなら、シャワーがなく衛生状態が悪い宿でも数日は我慢できる。", pos: { mud: 2, active: 1 }, neg: { clean: 2, safe: 1 } },
+        { text: "旅行のスケジュールは、分刻みで決めるよりも「その場の気分」で決める余白を多く残したい。", pos: { flow: 2, safe: 0.5 }, neg: { order: 2, active: 0.5 } },
+        { text: "安全なリゾート地よりも、少し危険な匂いのする路地裏や、地図にない場所の方にワクワクする。", pos: { active: 2, mud: 1 }, neg: { safe: 2, clean: 1 } },
+        { text: "旅先での食事は、個室でゆっくりよりも、現地の人と相席になるような賑やかな場所が好きだ。", pos: { social: 2, mud: 0.5 }, neg: { solo: 2, clean: 0.5 } },
+        { text: "電車の運休などで予定が完全に崩れた時、パニックになるよりも「面白い展開になった」と感じる。", pos: { flow: 2, active: 1 }, neg: { order: 2, safe: 1 } },
+        { text: "言葉が全く通じない場所で、ジェスチャーだけで交渉するのは（怖さよりも）むしろ楽しい。", pos: { active: 2, social: 1 }, neg: { safe: 2, solo: 1 } },
+        { text: "もし予算が余ったら、高級ホテルの部屋代よりも、アクティビティや現地体験にお金を使いたい。", pos: { active: 2, mud: 0.5 }, neg: { clean: 2, safe: 0.5 } },
+        { text: "丸一日誰とも話さず、ネットも繋がらない大自然の中で一人きり。それは自分にとって「至福の時間」だ。", pos: { solo: 2, mud: 1 }, neg: { social: 2, safe: 1 } },
+        { text: "見たことのない「謎の屋台料理（衛生面は怪しい）」があったら、迷わず挑戦して食べる。", pos: { mud: 2, active: 1 }, neg: { clean: 2, safe: 1 } },
+        { text: "旅の目的は「癒やし」よりも「価値観を壊されるような刺激」であるべきだ。", pos: { active: 2, flow: 1 }, neg: { safe: 2, order: 1 } },
+        { text: "一緒に行くなら、自分に合わせてくれる人より、振り回してでも新しい世界を見せてくれる人がいい。", pos: { flow: 2, social: 1 }, neg: { order: 2, solo: 1 } },
+        { text: "荷造りでは「もしも」を考えて、あれこれ荷物を持っていく方だ（心配性である）。", pos: { order: 2, safe: 1 }, neg: { flow: 2, mud: 1 } },
+        { text: "毎朝の起床時間やルーティンは、旅先でも崩さずに守りたい。", pos: { order: 2, clean: 0.5 }, neg: { flow: 2, active: 0.5 } }
     ];
 
-    // 3. Unified Options
     const options = [
         { label: "完全にそう思う", weight: 1.0, type: "pos" },
         { label: "ややそう思う", weight: 0.5, type: "pos" },
@@ -246,9 +234,9 @@
         { label: "全くそう思わない", weight: 1.0, type: "neg" }
     ];
 
-    // === State & Logic ===
     let currentQIndex = 0;
     let scores = { mud: 0, clean: 0, active: 0, safe: 0, social: 0, solo: 0, flow: 0, order: 0 };
+    let finalId = ""; // シェア用にIDを保存する変数
 
     function startQuiz() {
         document.getElementById('start-screen').classList.add('hidden');
@@ -259,13 +247,11 @@
     function renderQuestion() {
         const q = questions[currentQIndex];
         document.getElementById('question-text').innerText = `Q${currentQIndex + 1}. ${q.text}`;
-        
         const pct = ((currentQIndex) / questions.length) * 100;
         document.getElementById('progress').style.width = `${pct}%`;
         
         const container = document.getElementById('options-container');
         container.innerHTML = '';
-
         options.forEach(opt => {
             const btn = document.createElement('button');
             btn.innerText = opt.label;
@@ -291,19 +277,19 @@
         const axis3 = scores.social - scores.solo;
         const axis4 = scores.flow - scores.order;
         
-        let id = "";
-        id += axis1 > 0 ? "泥" : "浄";
-        id += axis2 > 0 ? "攻" : "安";
-        id += axis3 > 0 ? "共" : "孤";
-        id += axis4 > 0 ? "遊" : "律";
+        finalId = "";
+        finalId += axis1 > 0 ? "泥" : "浄";
+        finalId += axis2 > 0 ? "攻" : "安";
+        finalId += axis3 > 0 ? "共" : "孤";
+        finalId += axis4 > 0 ? "遊" : "律";
 
-        const data = resultData[id];
-        document.getElementById('result-kanji').innerText = `【${id}】`;
+        const data = resultData[finalId];
+        document.getElementById('result-kanji').innerText = `【${finalId}】`;
         document.getElementById('result-title').innerText = data.title;
         document.getElementById('result-desc-text').innerText = data.desc;
         
-        // ★重要：ここでローカルの画像を読み込みます
-        document.getElementById('result-image').src = `./images/${id}.png`;
+        // フォルダの画像を読み込み
+        document.getElementById('result-image').src = `./images/${finalId}.png`;
 
         const maxScore = 15; 
         const setDot = (elementId, netScore) => {
@@ -313,6 +299,15 @@
             setTimeout(() => { document.getElementById(elementId).style.left = `${percent}%`; }, 100);
         };
         setDot('dot-1', axis1); setDot('dot-2', axis2); setDot('dot-3', axis3); setDot('dot-4', axis4);
+    }
+
+    // ★追加: シェア機能
+    function shareOnX() {
+        const data = resultData[finalId];
+        const text = `私のTravel IDは【${finalId}】！\nタイプ：${data.title}\nあなたの旅のスタイルは？\n#TravelID診断\n`;
+        const url = window.location.href; // 今のページのURLを取得
+        const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+        window.open(shareUrl, '_blank');
     }
 </script>
 </body>
