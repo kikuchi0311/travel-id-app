@@ -542,8 +542,8 @@
         document.getElementById('result-rec').innerText = data.rec;
         document.getElementById('result-item').innerText = data.item;
         
-        // マッチング相手（ID部分は漢字のまま）
-        document.getElementById('result-match').innerText = `Best Match: 【${resultData[finalId].match}】`;
+        // ★修正ポイント： data.match を参照するように変更
+        document.getElementById('result-match').innerText = `Best Match: 【${data.match}】`;
         
         // レア演出
         const rareBanner = document.getElementById('rare-banner');
