@@ -15,6 +15,7 @@
             --card: #ffffff;
             --text: #1e293b;
             --x-color: #000000;
+            --rare-gold: #FFD700; /* レア演出用の金色 */
         }
 
         body {
@@ -110,7 +111,32 @@
             background: linear-gradient(45deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2;
         }
         
-        /* New Info Box (Rec & Match) */
+        /* ★新機能：レア確定演出バナーのスタイル */
+        .rare-banner {
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+            background-size: 200% 200%;
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-weight: 900;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            border: 3px solid #fff;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            animation: rareGlow 2s infinite alternate, gradientMove 3s ease infinite;
+        }
+        @keyframes rareGlow {
+            from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); transform: scale(1); }
+            to { box-shadow: 0 0 25px rgba(255, 215, 0, 0.9); transform: scale(1.02); }
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .rare-star { color: #fff; font-size: 1.3em; margin: 0 5px; }
+        .rare-title { font-size: 22px; margin-top: 5px; letter-spacing: 2px; }
+
         .info-box {
             background: #f1f5f9;
             border-radius: 16px;
@@ -143,9 +169,13 @@
             margin-top: 5px;
         }
 
+        .neutral-advice-box {
+            margin-top: 10px; padding: 10px; background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 8px; font-size: 12px; color: #831843; border-left: 3px solid #db2777; display: none;
+        }
+
         .result-description { text-align: left; font-size: 15px; color: #475569; margin-bottom: 30px; line-height: 1.8; }
 
-        /* Spectrum Styles */
         .spectrum-container { margin-top: 30px; text-align: left; padding-top: 20px; border-top: 2px dashed #e2e8f0;}
         .axis-row { margin-bottom: 25px; }
         .axis-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #94a3b8; }
@@ -172,7 +202,7 @@
         <h2>あなたの旅のスタイルを<br>13問で解明します。</h2>
         <div style="margin: 20px auto; width: 120px; height: 120px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px;">✈️</div>
         <button class="start-btn" onclick="startQuiz()">診断を始める</button>
-        <p style="font-size: 12px; color: #94a3b8; margin-top: 30px;">Ver 3.0 (Full Features)</p>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 30px;">Ver 5.0 (Rare Effect Added)</p>
     </div>
 
     <div id="quiz-screen" class="hidden">
@@ -182,6 +212,8 @@
     </div>
 
     <div id="result-screen" class="hidden fade-in">
+        <div id="rare-banner" class="rare-banner hidden"></div>
+
         <div class="image-container">
             <img id="result-image" class="result-img" src="" alt="Result Image">
         </div>
@@ -210,6 +242,7 @@
             <div class="info-title" style="color: #db2777;">❤️ 最高の旅パートナー</div>
             <div class="match-tag" id="result-match"></div>
             <p style="font-size: 12px; margin-top: 8px; color: #831843;">このタイプの人と行くと、互いに補い合い、最高の旅になります。</p>
+            <div id="neutral-advice" class="neutral-advice-box"></div>
         </div>
 
         <div class="spectrum-container">
@@ -236,123 +269,27 @@
 </div>
 
 <script>
-    // 1. Result Data (Enhanced with B & C plans)
+    // 1. Result Data
     const resultData = {
-        "泥攻孤遊": { 
-            title: "孤高のハードコア冒険家", 
-            desc: "最も過酷な環境を愛するタイプ。計画は一切立てず、その日の直感と出会いに身を任せる。快適さよりも「生の実感」を求め、誰も行かない場所へ一人で踏み込むことに至上の喜びを感じる。",
-            rec: "インド（バラナシ）、アマゾン奥地、モンゴル草原",
-            item: "高性能なバックパック、浄水ボトル、G-SHOCK",
-            match: "泥攻共遊"
-        },
-        "泥攻孤律": { 
-            title: "ストイックな探検家", 
-            desc: "過酷な目標（例：未踏峰制覇）のために、綿密な準備とトレーニングを欠かさない。楽しみのための旅ではなく「ミッション」としての旅を好む。",
-            rec: "キリマンジャロ登山、南極クルーズ、パタゴニア",
-            item: "登山靴、詳細な地形図、救急セット",
-            match: "泥安孤律"
-        },
-        "泥攻共遊": { 
-            title: "お祭り騒ぎのサバイバー", 
-            desc: "「ヤバい場所」で仲間と大騒ぎするのが大好き。トラブルすらも笑い話に変えるポジティブさを持つ。衛生観念は低いが、その場のノリと体力で全てを乗り切る。",
-            rec: "タイ（パンガン島のフルムーンパーティ）、ブラジル（カーニバル）",
-            item: "スピーカー、GoPro、二日酔いの薬",
-            match: "泥攻孤遊"
-        },
-        "泥攻共律": { 
-            title: "過酷ツアーの熱血リーダー", 
-            desc: "ハードな旅程（例：ジャングル縦走）を企画し、仲間を率いる隊長タイプ。リスク管理はしっかり行うが、求める体験のレベルが高すぎるため、ついて来られる人は限られるかも。",
-            rec: "マチュピチュ遺跡（インカ道トレッキング）、サファリツアー",
-            item: "トランシーバー、予備バッテリー、旅のしおり（分厚い）",
-            match: "浄攻共律"
-        },
-        "泥安孤遊": { 
-            title: "ディープな街の放浪詩人", 
-            desc: "観光地ではない、現地の生活感が溢れる路地裏を好む。特別な何かをするわけではなく、ただそこに「居る」ことを楽しむ。社会的な交流は避け、自分の世界に浸る。",
-            rec: "ベトナム（ハノイの路地）、ポルトガル（リスボン）、台湾（九份の奥）",
-            item: "フィルムカメラ、文庫本、スケッチブック",
-            match: "泥安孤律"
-        },
-        "泥安孤律": { 
-            title: "マニアックな研究者", 
-            desc: "特定のニッチな対象（例：辺境の遺跡、奇妙な食文化）を研究するために旅をする。行動範囲は狭くリスクは取らないが、対象への没入度は凄まじい。",
-            rec: "エジプト（マイナーな遺跡）、カンボジア（アンコールワット周辺）",
-            item: "双眼鏡、ボイスレコーダー、専門書",
-            match: "泥攻孤律"
-        },
-        "泥安共遊": { 
-            title: "下町の愛されキャラ", 
-            desc: "安宿のドミトリーや地元の食堂で、いつの間にか現地の人と仲良くなっている。計画性がなく、お金もないが、愛嬌とコミュニケーション能力で何とかしてしまう。",
-            rec: "タイ（カオサン通り）、メキシコ（オアハカ）、台湾（夜市）",
-            item: "折り紙（現地の人へのプレゼント）、翻訳アプリ、笑顔",
-            match: "泥攻共遊"
-        },
-        "泥安共律": { 
-            title: "激安ツアーのしっかり者", 
-            desc: "「いかに安く、ディープな体験をするか」に命をかける節約旅行家。不便さは許容するが、無駄な出費は許さない。グループ旅行では会計係として重宝される。",
-            rec: "ラオス（バンビエン）、インド（鉄道の旅）、LCCで行くアジア周遊",
-            item: "電卓、S字フック、圧縮袋",
-            match: "浄安共律"
-        },
-        "浄攻孤遊": { 
-            title: "スタイリッシュな自由人", 
-            desc: "清潔で洗練された空間を好むが、行動は自由奔放。最新のデザインホテルに泊まりつつ、昼間は気の向くままに街を散策する。自分のセンスに絶対の自信を持つ。",
-            rec: "ニューヨーク（SOHO）、パリ（マレ地区）、北欧デザイン巡り",
-            item: "MacBook、サングラス、お気に入りの香水",
-            match: "浄安孤遊"
-        },
-        "浄攻孤律": { 
-            title: "完璧主義の絶景ハンター", 
-            desc: "最高の「一枚」を撮るためなら、高級機材を担いで早朝から行動する。ただし、宿泊先や移動手段は快適で確実なものを手配済み。効率的に目的を達成する。",
-            rec: "スイス（ツェルマット）、アイスランド（オーロラ）、ウユニ塩湖（高級ツアー）",
-            item: "一眼レフカメラ、三脚、防寒着",
-            match: "泥安孤律"
-        },
-        "浄攻共遊": { 
-            title: "キラキラ女子旅のカリスマ", 
-            desc: "最新のトレンドスポットや映えるカフェを巡るのが大好き。計画は「その時のテンション」で変わるが、清潔感とオシャレさだけは譲れない。",
-            rec: "韓国（ソウルのおしゃれカフェ）、ドバイ、ロサンゼルス",
-            item: "自撮り棒、ヘアアイロン、複数の水着",
-            match: "浄安共遊"
-        },
-        "浄攻共律": { 
-            title: "アクティブ・リゾートの幹事長", 
-            desc: "高級リゾートでのゴルフやダイビングなど、快適かつ活動的な旅を計画する。全員が楽しめるように完璧なスケジュールを組み、レストラン予約も抜かりない。",
-            rec: "ハワイ（ホノルル）、オーストラリア（ゴールドコースト）、沖縄（宮古島）",
-            item: "ゴルフバッグ、日焼け止め、クレジットカード（プラチナ）",
-            match: "泥攻共律"
-        },
-        "浄安孤遊": { 
-            title: "優雅なホテルステイ愛好家", 
-            desc: "旅の目的は「何もしないこと」。最高級のホテルの部屋やラウンジで、一日中本を読んだり景色を眺めたりして過ごす。誰にも邪魔されない、静で贅沢な時間を愛する。",
-            rec: "モルディブ（水上コテージ）、バリ島（ウブドのヴィラ）",
-            item: "ノイズキャンセリングイヤホン、Kindle、アロマオイル",
-            match: "浄攻孤遊"
-        },
-        "浄安孤律": { 
-            title: "慎重派の癒やし求道者", 
-            desc: "絶対に失敗しない、安全で清潔な旅しかしない。評判の良い温泉旅館やリトリート施設を早期に予約し、決まったルーティンで心身を癒やす。",
-            rec: "京都（老舗旅館）、フィンランド（サウナ）、箱根",
-            item: "マイ枕、常備薬セット、ガイドブック（熟読済み）",
-            match: "浄安共律"
-        },
-        "浄安共遊": { 
-            title: "のんびり温泉旅行グループ", 
-            desc: "気の合う仲間や家族と、清潔な宿でのんびり過ごすのが好き。細かい計画は立てず、「とりあえず温泉入って美味しいもの食べよう」というゆるいスタンス。",
-            rec: "台湾（北投温泉）、草津温泉、北海道（食べ歩き）",
-            item: "トランプ・UNO、お菓子、楽な部屋着",
-            match: "浄攻共遊"
-        },
-        "浄安共律": { 
-            title: "王道のパッケージツアー客", 
-            desc: "大手旅行会社の添乗員付きツアーを好む。移動、食事、宿泊、全てがお膳立てされた安全・安心・清潔な旅こそが至高。自分で調べる手間を嫌い、プロに任せたい。",
-            rec: "イタリア（主要都市周遊ツアー）、フランス（モンサンミッシェル）、クルーズ旅行",
-            item: "旅行会社のバッジ、首下げパスポートケース、日本食（インスタント味噌汁）",
-            match: "浄安孤律"
-        }
+        "泥攻孤遊": { title: "孤高のハードコア冒険家", desc: "最も過酷な環境を愛するタイプ。計画は一切立てず、その日の直感と出会いに身を任せる。快適さよりも「生の実感」を求め、誰も行かない場所へ一人で踏み込むことに至上の喜びを感じる。", rec: "インド（バラナシ）、アマゾン奥地、モンゴル草原", item: "高性能なバックパック、浄水ボトル、G-SHOCK", match: "泥攻孤律" },
+        "泥攻孤律": { title: "ストイックな探検家", desc: "過酷な目標（例：未踏峰制覇）のために、綿密な準備とトレーニングを欠かさない。楽しみのための旅ではなく「ミッション」としての旅を好む。", rec: "キリマンジャロ登山、南極クルーズ、パタゴニア", item: "登山靴、詳細な地形図、救急セット", match: "泥攻孤遊" },
+        "泥攻共遊": { title: "お祭り騒ぎのサバイバー", desc: "「ヤバい場所」で仲間と大騒ぎするのが大好き。トラブルすらも笑い話に変えるポジティブさを持つ。衛生観念は低いが、その場のノリと体力で全てを乗り切る。", rec: "タイ（パンガン島のフルムーンパーティ）、ブラジル（カーニバル）", item: "スピーカー、GoPro、二日酔いの薬", match: "泥攻共律" },
+        "泥攻共律": { title: "過酷ツアーの熱血リーダー", desc: "ハードな旅程（例：ジャングル縦走）を企画し、仲間を率いる隊長タイプ。リスク管理はしっかり行うが、求める体験のレベルが高すぎるため、ついて来られる人は限られるかも。", rec: "マチュピチュ遺跡（インカ道トレッキング）、サファリツアー", item: "トランシーバー、予備バッテリー、旅のしおり（分厚い）", match: "泥攻共遊" },
+        "泥安孤遊": { title: "ディープな街の放浪詩人", desc: "観光地ではない、現地の生活感が溢れる路地裏を好む。特別な何かをするわけではなく、ただそこに「居る」ことを楽しむ。社会的な交流は避け、自分の世界に浸る。", rec: "ベトナム（ハノイの路地）、ポルトガル（リスボン）、台湾（九份の奥）", item: "フィルムカメラ、文庫本、スケッチブック", match: "泥安共遊" },
+        "泥安孤律": { title: "マニアックな研究者", desc: "特定のニッチな対象（例：辺境の遺跡、奇妙な食文化）を研究するために旅をする。行動範囲は狭くリスクは取らないが、対象への没入度は凄まじい。", rec: "エジプト（マイナーな遺跡）、カンボジア（アンコールワット周辺）", item: "双眼鏡、ボイスレコーダー、専門書", match: "泥安共律" },
+        "泥安共遊": { title: "下町の愛されキャラ", desc: "安宿のドミトリーや地元の食堂で、いつの間にか現地の人と仲良くなっている。計画性がなく、お金もないが、愛嬌とコミュニケーション能力で何とかしてしまう。", rec: "タイ（カオサン通り）、メキシコ（オアハカ）、台湾（夜市）", item: "折り紙（現地の人へのプレゼント）、翻訳アプリ、笑顔", match: "泥安孤遊" },
+        "泥安共律": { title: "激安ツアーのしっかり者", desc: "「いかに安く、ディープな体験をするか」に命をかける節約旅行家。不便さは許容するが、無駄な出費は許さない。グループ旅行では会計係として重宝される。", rec: "ラオス（バンビエン）、インド（鉄道の旅）、LCCで行くアジア周遊", item: "電卓、S字フック、圧縮袋", match: "泥安孤律" },
+        "浄攻孤遊": { title: "スタイリッシュな自由人", desc: "清潔で洗練された空間を好むが、行動は自由奔放。最新のデザインホテルに泊まりつつ、昼間は気の向くままに街を散策する。自分のセンスに絶対の自信を持つ。", rec: "ニューヨーク（SOHO）、パリ（マレ地区）、北欧デザイン巡り", item: "MacBook、サングラス、お気に入りの香水", match: "浄攻孤律" },
+        "浄攻孤律": { title: "完璧主義の絶景ハンター", desc: "最高の「一枚」を撮るためなら、高級機材を担いで早朝から行動する。ただし、宿泊先や移動手段は快適で確実なものを手配済み。効率的に目的を達成する。", rec: "スイス（ツェルマット）、アイスランド（オーロラ）、ウユニ塩湖（高級ツアー）", item: "一眼レフカメラ、三脚、防寒着", match: "浄攻孤遊" },
+        "浄攻共遊": { title: "キラキラ女子旅のカリスマ", desc: "最新のトレンドスポットや映えるカフェを巡るのが大好き。計画は「その時のテンション」で変わるが、清潔感とオシャレさだけは譲れない。", rec: "韓国（ソウルのおしゃれカフェ）、ドバイ、ロサンゼルス", item: "自撮り棒、ヘアアイロン、複数の水着", match: "浄攻共律" },
+        "浄攻共律": { title: "アクティブ・リゾートの幹事長", desc: "高級リゾートでのゴルフやダイビングなど、快適かつ活動的な旅を計画する。全員が楽しめるように完璧なスケジュールを組み、レストラン予約も抜かりない。", rec: "ハワイ（ホノルル）、オーストラリア（ゴールドコースト）、沖縄（宮古島）", item: "ゴルフバッグ、日焼け止め、クレジットカード（プラチナ）", match: "浄攻共遊" },
+        "浄安孤遊": { title: "優雅なホテルステイ愛好家", desc: "旅の目的は「何もしないこと」。最高級のホテルの部屋やラウンジで、一日中本を読んだり景色を眺めたりして過ごす。誰にも邪魔されない、静で贅沢な時間を愛する。", rec: "モルディブ（水上コテージ）、バリ島（ウブドのヴィラ）", item: "ノイズキャンセリングイヤホン、Kindle、アロマオイル", match: "浄安孤律" },
+        "浄安孤律": { title: "慎重派の癒やし求道者", desc: "絶対に失敗しない、安全で清潔な旅しかしない。評判の良い温泉旅館やリトリート施設を早期に予約し、決まったルーティンで心身を癒やす。", rec: "京都（老舗旅館）、フィンランド（サウナ）、箱根", item: "マイ枕、常備薬セット、ガイドブック（熟読済み）", match: "浄安共律" },
+        "浄安共遊": { title: "のんびり温泉旅行グループ", desc: "気の合う仲間や家族と、清潔な宿でのんびり過ごすのが好き。細かい計画は立てず、「とりあえず温泉入って美味しいもの食べよう」というゆるいスタンス。", rec: "台湾（北投温泉）、草津温泉、北海道（食べ歩き）", item: "トランプ・UNO、お菓子、楽な部屋着", match: "浄安孤遊" },
+        "浄安共律": { title: "王道のパッケージツアー客", desc: "大手旅行会社の添乗員付きツアーを好む。移動、食事、宿泊、全てがお膳立てされた安全・安心・清潔な旅こそが至高。自分で調べる手間を嫌い、プロに任せたい。", rec: "イタリア（主要都市周遊ツアー）、フランス（モンサンミッシェル）、クルーズ旅行", item: "旅行会社のバッジ、首下げパスポートケース、日本食（インスタント味噌汁）", match: "浄安孤律" }
     };
 
-    // 2. Questions (Unified)
+    // 2. Questions
     const questions = [
         { text: "絶景や一生に一度の体験のためなら、シャワーがなく衛生状態が悪い宿でも数日は我慢できる。", pos: { mud: 2, active: 1 }, neg: { clean: 2, safe: 1 } },
         { text: "旅行のスケジュールは、分刻みで決めるよりも「その場の気分」で決める余白を多く残したい。", pos: { flow: 2, safe: 0.5 }, neg: { order: 2, active: 0.5 } },
@@ -428,11 +365,34 @@
         document.getElementById('result-kanji').innerText = `【${finalId}】`;
         document.getElementById('result-title').innerText = data.title;
         document.getElementById('result-desc-text').innerText = data.desc;
-        
-        // 新機能：おすすめ & 相性を表示
         document.getElementById('result-rec').innerText = data.rec;
         document.getElementById('result-item').innerText = data.item;
         document.getElementById('result-match').innerText = `Best Match: 【${data.match}】`;
+        
+        const adviceBox = document.getElementById('neutral-advice');
+        adviceBox.style.display = 'none';
+        adviceBox.innerText = '';
+        if (Math.abs(axis1) <= 4) {
+             const opposite = axis1 > 0 ? "浄（Clean）" : "泥（Mud）";
+             adviceBox.innerHTML = `<strong>💡 ワンポイント:</strong><br>あなたは「衛生観念」の数値が平均に近いため、柔軟性があります。<br>相手も極端な潔癖・不潔でなければ<strong>【${opposite}】</strong>タイプの人でも、意外と許容できるかもしれません！`;
+             adviceBox.style.display = 'block';
+        }
+
+        // ★新機能：レア確定演出ロジック
+        const rareBanner = document.getElementById('rare-banner');
+        rareBanner.classList.add('hidden'); // 一旦隠す
+        rareBanner.innerHTML = ''; // 中身をリセット
+
+        // 泥がマックスに近い（axis1が+6以上。理論最大値は+7）
+        if (axis1 >= 6) {
+            rareBanner.innerHTML = `<div><span class="rare-star">★★★★★</span> 泥属性・極 <span class="rare-star">★★★★★</span></div><div class="rare-title">究極のサバイバー</div>`;
+            rareBanner.classList.remove('hidden');
+        } 
+        // 浄がマックスに近い（axis1が-7以下。理論最小値は-8）
+        else if (axis1 <= -7) {
+            rareBanner.innerHTML = `<div><span class="rare-star">★★★★★</span> 浄属性・極 <span class="rare-star">★★★★★</span></div><div class="rare-title">至高の聖域の住人</div>`;
+            rareBanner.classList.remove('hidden');
+        }
 
         document.getElementById('result-image').src = `./images/${finalId}.png`;
 
@@ -448,7 +408,13 @@
 
     function shareOnX() {
         const data = resultData[finalId];
-        const text = `私のTravel IDは【${finalId}】！\nタイプ：${data.title}\nおすすめ：${data.rec}\n#TravelID診断\n`;
+        // レア演出が出ている場合は、シェア文言にも追加する
+        let rareText = "";
+        const axis1 = scores.mud - scores.clean;
+        if (axis1 >= 6) rareText = "【レア度★5：究極のサバイバー】\n";
+        else if (axis1 <= -7) rareText = "【レア度★5：至高の聖域の住人】\n";
+
+        const text = `${rareText}私のTravel IDは【${finalId}】！\nタイプ：${data.title}\nおすすめ：${data.rec}\n#TravelID診断\n`;
         const url = window.location.href;
         const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
         window.open(shareUrl, '_blank');
