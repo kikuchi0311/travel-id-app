@@ -18,7 +18,6 @@
         body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",YuGothic,sans-serif;background-color:var(--bg);color:var(--text);margin:0;padding:20px;line-height:1.6;}
         .container{background:var(--card);width:100%;max-width:500px;margin:0 auto;padding:30px;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,0.08);text-align:center;position:relative;overflow:hidden;}
         
-        /* Switch UI */
         .mode-switch-container { display: flex; justify-content: center; margin: 20px 0; }
         .mode-switch { display: flex; background: #e2e8f0; border-radius: 30px; padding: 4px; position: relative; cursor: pointer; width: 200px; height: 40px; align-items: center; }
         .mode-option { flex: 1; text-align: center; font-weight: bold; font-size: 14px; z-index: 2; color: #64748b; transition: color 0.3s; }
@@ -26,11 +25,9 @@
         .mode-bg { position: absolute; top: 2px; left: 2px; width: 50%; height: 36px; background: var(--primary); border-radius: 28px; transition: left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index: 1; }
         .mode-switch.japan-mode .mode-bg { left: 50%; background: #ef4444; }
 
-        /* Map Style */
         #map-container { width: 100%; height: 350px; border-radius: 16px; margin-top: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; border: 2px solid #e2e8f0;}
         #map { width: 100%; height: 100%; }
         
-        /* UI Elements */
         .lang-switch{position:absolute;top:20px;right:20px;background:#f1f5f9;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold;cursor:pointer;border:1px solid #e2e8f0;color:#64748b;}
         h1{font-size:24px;margin:10px 0;font-weight:800;margin-top:20px;}
         h2{font-size:16px;color:#64748b;margin-bottom:30px;font-weight:normal;}
@@ -51,7 +48,6 @@
         .progress-bar{height:6px;background:#e2e8f0;margin-bottom:20px;border-radius:3px;overflow:hidden;}
         .progress-fill{height:100%;background:var(--primary);width:0%;transition:width 0.3s;}
 
-        /* Result UI */
         .info-box{background:#f1f5f9;border-radius:16px;padding:20px;text-align:left;margin-bottom:15px;border:1px solid #e2e8f0;}
         .info-title{font-size:12px;font-weight:bold;color:#64748b;margin-bottom:5px;text-transform:uppercase;}
         .info-content{font-size:16px;font-weight:bold;color:#334155;}
@@ -67,7 +63,6 @@
         .fade-in{animation:fadeIn 0.6s ease-out;}
         @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 
-        /* Map Popup Customization */
         .map-card { width: 180px; }
         .map-card h4 { margin: 0 0 5px 0; font-size: 14px; color: #1e293b; }
         .map-card p { font-size: 11px; margin: 0; color: #64748b; line-height: 1.4; }
@@ -83,7 +78,7 @@
         <h2 id="start-subtitle">あなたの旅のスタイルを<br>13問で解明します。</h2>
         <img src="./images/logo.png" alt="Travel ID Logo" class="app-logo">
         <button class="start-btn" onclick="startQuiz()" id="start-btn-text" style="background:linear-gradient(135deg,var(--primary),var(--accent));color:white;border:none;font-size:20px;padding:20px 40px;width:100%;border-radius:16px;font-weight:bold;cursor:pointer;">診断を始める</button>
-        <p style="font-size:10px; color:#cbd5e1; margin-top:15px;">v17.0 (Spreadsheet Integration)</p>
+        <p style="font-size:10px; color:#cbd5e1; margin-top:15px;">v18.0 (Fixed Map & Data)</p>
     </div>
 
     <div id="quiz-screen" class="hidden">
@@ -155,6 +150,7 @@
     let map = null;
     let markers = [];
     let japanDataCache = {}; 
+    let currentSpotName = ""; // シェア用
 
     // --- Data Fetching (Startup) ---
     function fetchJapanData() {
@@ -163,17 +159,20 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
+                console.log("Raw CSV:", results.data); // Debug check
                 results.data.forEach(row => {
                     if(row.id) {
-                        if (!japanDataCache[row.id]) japanDataCache[row.id] = [];
-                        japanDataCache[row.id].push({
+                        // 【修正1】 IDの空白を除去して保存
+                        const cleanId = row.id.trim();
+                        if (!japanDataCache[cleanId]) japanDataCache[cleanId] = [];
+                        japanDataCache[cleanId].push({
                             rec: row.rec_jp,
                             rec_en: row.rec_en,
                             desc: row.desc,
                             tag: row.tag,
                             lat: parseFloat(row.lat),
                             lng: parseFloat(row.lng),
-                            zoom: parseInt(row.zoom)
+                            zoom: parseInt(row.zoom) || 12 // Default if missing
                         });
                     }
                 });
@@ -203,24 +202,24 @@
     const questions=[{ja:"絶景のためなら、シャワーのない不衛生な宿でも我慢できる。",en:"I can endure poor hygiene for a great view.",pos:{mud:2,active:1},neg:{clean:2,safe:1}},{ja:"スケジュールは決めず、その場の気分で動きたい。",en:"I prefer spontaneity over planning.",pos:{flow:2,safe:0.5},neg:{order:2,active:0.5}},{ja:"安全なリゾートより、少し危険な路地裏にワクワクする。",en:"Gritty alleys excite me more than safe resorts.",pos:{active:2,mud:1},neg:{safe:2,clean:1}},{ja:"食事は個室よりも、現地の人と相席になるような店がいい。",en:"I prefer lively local eateries over private dining.",pos:{social:2,mud:0.5},neg:{solo:2,clean:0.5}},{ja:"トラブル（電車遅延など）も「面白い展開」だと楽しめる。",en:"Travel troubles are interesting twists, not panic.",pos:{flow:2,active:1},neg:{order:2,safe:1}},{ja:"言葉が通じない場所でのジェスチャー交渉は楽しい。",en:"Communicating with gestures is fun.",pos:{active:2,social:1},neg:{safe:2,solo:1}},{ja:"予算があれば、高級ホテルよりアクティビティに使いたい。",en:"I spend extra budget on activities, not hotels.",pos:{active:2,mud:0.5},neg:{clean:2,safe:0.5}},{ja:"誰とも話さず大自然で一人きり。それは至福の時間だ。",en:"Being alone in nature is bliss.",pos:{solo:2,mud:1},neg:{social:2,safe:1}},{ja:"見たことのない謎の屋台料理も、迷わず食べる。",en:"I try mysterious street food without hesitation.",pos:{mud:2,active:1},neg:{clean:2,safe:1}},{ja:"旅の目的は「癒やし」より「価値観を壊す刺激」だ。",en:"Travel is for culture shock, not relaxation.",pos:{active:2,flow:1},neg:{safe:2,order:1}},{ja:"自分に合わせてくれる人より、振り回してくる人がいい。",en:"I prefer crazy travel companions over passive ones.",pos:{flow:2,social:1},neg:{order:2,solo:1}},{ja:"荷造りは「もしも」を考えて多くなる方だ。",en:"I overpack for 'what if' scenarios.",pos:{order:2,safe:1},neg:{flow:2,mud:1}},{ja:"毎朝のルーティンは旅先でも守りたい。",en:"I keep my morning routine even when traveling.",pos:{order:2,clean:0.5},neg:{flow:2,active:0.5}}];
     const optionsData=[{ja:"完全にそう思う",en:"Strongly Agree",weight:1.0,type:"pos"},{ja:"ややそう思う",en:"Agree",weight:0.5,type:"pos"},{ja:"どちらでもない",en:"Neutral",weight:0,type:"neu"},{ja:"あまりそう思わない",en:"Disagree",weight:0.5,type:"neg"},{ja:"全くそう思わない",en:"Strongly Disagree",weight:1.0,type:"neg"}];
     
-    // Result Data (Titles & World Mock)
+    // Result Data (Full World Mock + Desc Fix)
     const resultData = {
-        "泥攻孤遊": { ja: { title: "孤高のハードコア冒険家", desc: "快適さより生の実感。直感で動く。" }, en: { title: "The Lone Hardcore Adventurer", desc: "Raw reality over comfort." }, world: [{ rec: "エチオピア（ダナキル砂漠）", rec_en: "Ethiopia", tag: "AdventureTravel", lat: 14.0323, lng: 40.2936 }] },
-        "浄安共律": { ja: { title: "クリスタル・コーディネーター", desc: "清潔と秩序を愛する完璧主義者。" }, en: { title: "The Crystal Coordinator", desc: "Loves cleanliness and order." }, world: [{ rec: "シンガポール（マリーナベイ）", rec_en: "Singapore", tag: "LuxuryTravel", lat: 1.2834, lng: 103.8607 }] },
-        "泥攻孤律": { ja: { title: "ストイックな探検家", desc: "過酷な目標への準備を怠らない。" }, en: { title: "The Stoic Explorer", desc: "Meticulous prep for tough goals." }, world: [{ rec: "パタゴニア", rec_en: "Patagonia", tag: "Patagonia", lat: -48.4239, lng: -72.5630 }] },
-        "泥攻共遊": { ja: { title: "お祭り騒ぎのサバイバー", desc: "混沌と騒音を愛する。" }, en: { title: "The Party Survivor", desc: "Loves chaos and noise." }, world: [{ rec: "インド（バラナシ）", rec_en: "Varanasi", tag: "Varanasi", lat: 25.3176, lng: 82.9739 }] },
-        "泥攻共律": { ja: { title: "過酷ツアーの熱血リーダー", desc: "ハードな旅を統率する。" }, en: { title: "The Expedition Leader", desc: "Leads hardcore trips." }, world: [{ rec: "キリマンジャロ", rec_en: "Kilimanjaro", tag: "Kilimanjaro", lat: -3.0674, lng: 37.3556 }] },
-        "泥安孤遊": { ja: { title: "ディープな街の放浪詩人", desc: "路地裏の生活感を愛する。" }, en: { title: "The Wandering Poet", desc: "Loves gritty alleys." }, world: [{ rec: "ベトナム（ハノイ旧市街）", rec_en: "Hanoi", tag: "Hanoi", lat: 21.0285, lng: 105.8542 }] },
-        "泥安孤律": { ja: { title: "マニアックな研究者", desc: "ニッチな対象に没入する。" }, en: { title: "The Maniac Researcher", desc: "Immersion in niche subjects." }, world: [{ rec: "アンコールワット", rec_en: "Angkor Wat", tag: "AngkorWat", lat: 13.4125, lng: 103.8670 }] },
-        "泥安共遊": { ja: { title: "下町の愛されキャラ", desc: "現地の人と即仲良くなる。" }, en: { title: "The Local's Favorite", desc: "Instant friends with locals." }, world: [{ rec: "タイ（カオサン通り）", rec_en: "Khao San Road", tag: "KhaoSan", lat: 13.7589, lng: 100.4974 }] },
-        "泥安共律": { ja: { title: "激安ツアーのしっかり者", desc: "安くディープに。無駄を嫌う。" }, en: { title: "The Budget Master", desc: "Cheap and deep." }, world: [{ rec: "台湾（九份）", rec_en: "Jiufen", tag: "Jiufen", lat: 25.1098, lng: 121.8452 }] },
-        "浄攻孤遊": { ja: { title: "スタイリッシュな自由人", desc: "洗練と自由を愛する。" }, en: { title: "The Stylish Free Spirit", desc: "Loves style and freedom." }, world: [{ rec: "バリ島（ウブド）", rec_en: "Ubud", tag: "Ubud", lat: -8.5069, lng: 115.2625 }] },
-        "浄攻孤律": { ja: { title: "完璧主義の絶景ハンター", desc: "最高の瞬間のために動く。" }, en: { title: "The Perfectionist", desc: "Chasing the perfect shot." }, world: [{ rec: "アイスランド", rec_en: "Iceland", tag: "Iceland", lat: 64.9631, lng: -19.0208 }] },
-        "浄攻共遊": { ja: { title: "キラキラ女子旅のカリスマ", desc: "トレンドと映えを巡る。" }, en: { title: "The Trendy Charisma", desc: "Trends and photos." }, world: [{ rec: "韓国（ソウル）", rec_en: "Seoul", tag: "Seoul", lat: 37.5665, lng: 126.9780 }] },
-        "浄攻共律": { ja: { title: "アクティブ・リゾートの幹事長", desc: "快適かつ活動的な完璧な旅。" }, en: { title: "The Resort Planner", desc: "Active luxury." }, world: [{ rec: "ドバイ", rec_en: "Dubai", tag: "Dubai", lat: 25.2048, lng: 55.2708 }] },
-        "浄安孤遊": { ja: { title: "優雅なホテルステイ愛好家", desc: "何もしない贅沢。" }, en: { title: "The Hotel Lover", desc: "Luxury of doing nothing." }, world: [{ rec: "パリ", rec_en: "Paris", tag: "Paris", lat: 48.8566, lng: 2.3522 }] },
-        "浄安孤律": { ja: { title: "慎重派の癒やし求道者", desc: "安全で清潔な癒やし。" }, en: { title: "The Cautious Healer", desc: "Safe and clean healing." }, world: [{ rec: "フィンランド", rec_en: "Finland", tag: "Finland", lat: 61.9241, lng: 25.7482 }] },
-        "浄安共遊": { ja: { title: "のんびり温泉旅行グループ", desc: "清潔な宿でまったり。" }, en: { title: "The Chill Group", desc: "Relaxing with friends." }, world: [{ rec: "ハワイ", rec_en: "Hawaii", tag: "Hawaii", lat: 19.8968, lng: -155.5828 }] }
+        "泥攻孤遊": { ja: { title: "孤高のハードコア冒険家", desc: "快適さより生の実感。直感で動く。" }, en: { title: "The Adventurer", desc: "Raw reality over comfort." }, world: [{ rec: "エチオピア（ダナキル砂漠）", rec_en: "Ethiopia", tag: "AdventureTravel", lat: 14.0323, lng: 40.2936, desc: "地球上で最も過酷な場所。" }] },
+        "浄安共律": { ja: { title: "クリスタル・コーディネーター", desc: "清潔と秩序を愛する完璧主義者。" }, en: { title: "The Coordinator", desc: "Cleanliness and order." }, world: [{ rec: "シンガポール（マリーナベイ）", rec_en: "Singapore", tag: "LuxuryTravel", lat: 1.2834, lng: 103.8607, desc: "完璧なインフラと衛生管理。" }] },
+        "泥攻孤律": { ja: { title: "ストイックな探検家", desc: "過酷な目標への準備を怠らない。" }, en: { title: "The Stoic Explorer", desc: "Meticulous prep." }, world: [{ rec: "パタゴニア", rec_en: "Patagonia", tag: "Patagonia", lat: -48.4239, lng: -72.5630, desc: "荒野の孤独と絶景。" }] },
+        "泥攻共遊": { ja: { title: "お祭り騒ぎのサバイバー", desc: "混沌と騒音を愛する。" }, en: { title: "The Party Survivor", desc: "Loves chaos." }, world: [{ rec: "インド（バラナシ）", rec_en: "Varanasi", tag: "Varanasi", lat: 25.3176, lng: 82.9739, desc: "生と死が混在するカオス。" }] },
+        "泥攻共律": { ja: { title: "過酷ツアーの熱血リーダー", desc: "ハードな旅を統率する。" }, en: { title: "The Leader", desc: "Leads hardcore trips." }, world: [{ rec: "キリマンジャロ", rec_en: "Kilimanjaro", tag: "Kilimanjaro", lat: -3.0674, lng: 37.3556, desc: "チームで挑む最高峰。" }] },
+        "泥安孤遊": { ja: { title: "ディープな街の放浪詩人", desc: "路地裏の生活感を愛する。" }, en: { title: "The Poet", desc: "Loves gritty alleys." }, world: [{ rec: "ベトナム（ハノイ旧市街）", rec_en: "Hanoi", tag: "Hanoi", lat: 21.0285, lng: 105.8542, desc: "バイクの騒音と路上のフォー。" }] },
+        "泥安孤律": { ja: { title: "マニアックな研究者", desc: "ニッチな対象に没入する。" }, en: { title: "The Researcher", desc: "Immersion in niche." }, world: [{ rec: "アンコールワット", rec_en: "Angkor Wat", tag: "AngkorWat", lat: 13.4125, lng: 103.8670, desc: "密林に眠る巨大遺跡。" }] },
+        "泥安共遊": { ja: { title: "下町の愛されキャラ", desc: "現地の人と即仲良くなる。" }, en: { title: "The Local's Favorite", desc: "Friends with locals." }, world: [{ rec: "タイ（カオサン通り）", rec_en: "Khao San Road", tag: "KhaoSan", lat: 13.7589, lng: 100.4974, desc: "バックパッカーの聖地。" }] },
+        "泥安共律": { ja: { title: "激安ツアーのしっかり者", desc: "安くディープに。無駄を嫌う。" }, en: { title: "The Budget Master", desc: "Cheap and deep." }, world: [{ rec: "台湾（九份）", rec_en: "Jiufen", tag: "Jiufen", lat: 25.1098, lng: 121.8452, desc: "ノスタルジックな石段の街。" }] },
+        "浄攻孤遊": { ja: { title: "スタイリッシュな自由人", desc: "洗練と自由を愛する。" }, en: { title: "The Free Spirit", desc: "Style and freedom." }, world: [{ rec: "バリ島（ウブド）", rec_en: "Ubud", tag: "Ubud", lat: -8.5069, lng: 115.2625, desc: "ヨガとオーガニックフード。" }] },
+        "浄攻孤律": { ja: { title: "完璧主義の絶景ハンター", desc: "最高の瞬間のために動く。" }, en: { title: "The Perfectionist", desc: "Perfect shot." }, world: [{ rec: "アイスランド", rec_en: "Iceland", tag: "Iceland", lat: 64.9631, lng: -19.0208, desc: "火と氷の絶景。" }] },
+        "浄攻共遊": { ja: { title: "キラキラ女子旅のカリスマ", desc: "トレンドと映えを巡る。" }, en: { title: "The Trendy Charisma", desc: "Trends and photos." }, world: [{ rec: "韓国（ソウル）", rec_en: "Seoul", tag: "Seoul", lat: 37.5665, lng: 126.9780, desc: "最新カフェとファッション。" }] },
+        "浄攻共律": { ja: { title: "アクティブ・リゾートの幹事長", desc: "快適かつ活動的な完璧な旅。" }, en: { title: "The Planner", desc: "Active luxury." }, world: [{ rec: "ドバイ", rec_en: "Dubai", tag: "Dubai", lat: 25.2048, lng: 55.2708, desc: "砂漠のラグジュアリー。" }] },
+        "浄安孤遊": { ja: { title: "優雅なホテルステイ愛好家", desc: "何もしない贅沢。" }, en: { title: "The Hotel Lover", desc: "Luxury of doing nothing." }, world: [{ rec: "パリ", rec_en: "Paris", tag: "Paris", lat: 48.8566, lng: 2.3522, desc: "セーヌ川沿いの散歩。" }] },
+        "浄安孤律": { ja: { title: "慎重派の癒やし求道者", desc: "安全で清潔な癒やし。" }, en: { title: "The Healer", desc: "Safe and clean." }, world: [{ rec: "フィンランド", rec_en: "Finland", tag: "Finland", lat: 61.9241, lng: 25.7482, desc: "湖畔のサウナと静寂。" }] },
+        "浄安共遊": { ja: { title: "のんびり温泉旅行グループ", desc: "清潔な宿でまったり。" }, en: { title: "The Chill Group", desc: "Relaxing with friends." }, world: [{ rec: "ハワイ", rec_en: "Hawaii", tag: "Hawaii", lat: 19.8968, lng: -155.5828, desc: "ワイキキビーチの夕日。" }] }
     };
 
     let currentQIndex=0; let userAnswers=new Array(questions.length).fill(null);
@@ -266,7 +265,6 @@
         
         document.getElementById('pre-result-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        
         document.getElementById('result-image').src=`./images/${finalId}.png`;
 
         // Map Init
@@ -293,18 +291,20 @@
     }
 
     function updateResultUI() {
-        if (!resultData[finalId]) finalId = "浄安共律"; // Default
+        if (!resultData[finalId]) finalId = "浄安共律"; // Fail-safe
         const basicData = resultData[finalId];
         const basic = basicData[currentLang];
         document.getElementById('result-id').innerText = `【${finalId}】`;
-        document.getElementById('result-desc').innerText = basic.title; // Show title as desc for now
+        document.getElementById('result-desc').innerText = basic.title;
         
         let spots = [];
         if (currentMode === 'japan') {
-            if (japanDataCache[finalId] && japanDataCache[finalId].length > 0) {
-                spots = japanDataCache[finalId];
+            // 【修正1】 IDの空白を除去して照合
+            const cleanFinalId = finalId.trim();
+            if (japanDataCache[cleanFinalId] && japanDataCache[cleanFinalId].length > 0) {
+                spots = japanDataCache[cleanFinalId];
             } else {
-                document.getElementById('rec-content').innerText = "Loading data...";
+                document.getElementById('rec-content').innerText = "Loading data or No Match...";
                 return;
             }
         } else {
@@ -319,6 +319,7 @@
 
     function updateInfoBox(spot) {
         const name = currentLang === 'ja' ? spot.rec : spot.rec_en;
+        currentSpotName = name; // For Sharing
         document.getElementById('rec-content').innerText = name;
         document.getElementById('insta-link').href = `https://www.instagram.com/explore/tags/${spot.tag}/`;
         document.getElementById('insta-link').innerText = `${translations[currentLang].instaBtn} #${spot.tag}`;
@@ -335,25 +336,41 @@
     }
 
     function updateMapPins(spots) {
+        if (!map) return;
         markers.forEach(m => map.removeLayer(m));
         markers = [];
         const bounds = [];
+        
         spots.forEach(spot => {
+            // 【修正2】 スポットが1つなら setView, 複数なら fitBounds
+            if (spots.length === 1) {
+                map.setView([spot.lat, spot.lng], spot.zoom || 6); // Worldモードのズーム修正
+            }
+            
             const marker = L.marker([spot.lat, spot.lng]).addTo(map);
             marker.on('click', () => { updateInfoBox(spot); marker.openPopup(); });
+            
             const name = currentLang === 'ja' ? spot.rec : spot.rec_en;
-            marker.bindPopup(`<div class="map-card"><h4>${name}</h4><p>${spot.desc || ''}</p></div>`);
+            // 【修正3】 説明文が空でも表示崩れを防ぐ
+            const desc = spot.desc || "Recommended by Travel ID";
+            marker.bindPopup(`<div class="map-card"><h4>${name}</h4><p>${desc}</p></div>`);
+            
             markers.push(marker);
             bounds.push([spot.lat, spot.lng]);
         });
-        if (bounds.length > 0) map.fitBounds(bounds, { padding: [50, 50] });
+
+        if (spots.length > 1) map.fitBounds(bounds, { padding: [50, 50] });
     }
 
+    // 【修正4】 シェア文言におすすめスポット追加
     function shareOnX() {
-        window.open(`https://twitter.com/intent/tweet?text=My Travel ID: ${finalId}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+        const text = `My Travel ID: ${finalId}\nRec: ${currentSpotName}\n#TravelID`;
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
     }
+    
     function copyForDiscord() {
-        navigator.clipboard.writeText(`My Travel ID: ${finalId}\n${window.location.href}`).then(() => alert("Copied!"));
+        const text = `My Travel ID: ${finalId}\nRecommended: ${currentSpotName}\n${window.location.href}`;
+        navigator.clipboard.writeText(text).then(() => alert("Copied for Discord!"));
     }
 </script>
 </body>
