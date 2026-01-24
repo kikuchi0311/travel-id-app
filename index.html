@@ -3,578 +3,458 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Discover your travel style based on values, not demographics.">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://unpkg.com https://*.basemaps.cartocdn.com; connect-src 'self' https://docs.google.com https://zqghkzukkzmpszdxyqgf.supabase.co;">
+    
     <title>Travel ID - Value Segmentation</title>
     <link rel="icon" href="./images/logo.png">
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
     <style>
-        :root{
-            --primary: #111827; 
-            --secondary: #6b7280; 
-            --accent: #2563eb; 
-            --bg: #f8fafc;
-            --border: #e2e8f0;
-            --pink: #ff007f; /* Neon Pink for Save */
-            --green: #10b981; 
-            --scale-5: #111827; --scale-4: #4b5563; --scale-3: #9ca3af; --scale-2: #d1d5db; --scale-1: #f3f4f6;
-            --discord: #5865F2;
-        }
-        body{font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color:var(--bg); color:var(--primary); margin:0; padding:0; line-height:1.6;}
-        .container{background:#ffffff; width:100%; max-width:480px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; box-shadow: 0 0 20px rgba(0,0,0,0.05); position:relative;}
-        
-        /* Language Toggle */
-        .lang-switch { 
-            position: absolute; top: 20px; right: 20px; 
-            font-size: 11px; font-weight: 800; color: var(--primary); 
-            cursor: pointer; z-index: 9999; background: white;
-            padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        /* Typography */
-        .header { padding: 60px 24px 40px; }
-        .brand-tag { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); display:block; margin-bottom: 12px;}
-        h1 { font-size: 38px; font-weight: 900; margin: 0; letter-spacing: -1.5px; line-height: 1.1; color: var(--primary); }
-        .hero-sub { font-size: 15px; color: var(--secondary); margin-top: 16px; font-weight: 500; }
-
-        /* Buttons */
-        .btn-primary {
-            background: var(--primary); color: white; border: none; font-size: 16px; padding: 18px; width: 100%; 
-            border-radius: 12px; font-weight: 700; cursor: pointer; transition: transform 0.1s; margin-top: 30px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .btn-primary:active { transform: scale(0.98); }
-
-        /* Quiz UI */
-        #quiz-screen { padding: 80px 24px 40px; }
-        .progress-track { height: 6px; background: #f1f5f9; margin-bottom: 30px; border-radius: 3px; overflow:hidden;}
-        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
-        .q-cat { font-size: 10px; font-weight: 800; color: var(--accent); letter-spacing: 1px; margin-bottom: 8px; display: block; text-transform: uppercase;}
-        .q-text { font-size: 20px; font-weight: 800; margin-bottom: 30px; min-height: 80px; line-height: 1.4; letter-spacing: -0.5px;}
-        
-        .opt-btn {
-            display: flex; align-items: center; width: 100%; padding: 14px 16px; margin-bottom: 8px;
-            border: 1px solid var(--border); border-radius: 12px; background: white;
-            text-align: left; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.1s;
-        }
-        .opt-5 { border-left: 6px solid var(--scale-5); }
-        .opt-4 { border-left: 4px solid var(--scale-4); }
-        .opt-3 { border-left: 2px solid var(--scale-3); color: var(--secondary); }
-        .opt-2 { border-left: 1px solid var(--scale-2); color: var(--secondary); }
-        .opt-1 { border-left: 1px solid var(--scale-1); color: #9ca3af; background: #f9fafb; }
-
-        /* Result Dashboard */
-        #result-screen { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; }
-        
-        .res-header { padding: 40px 24px 20px; background: white; border-bottom: 1px solid var(--border); flex-shrink: 0; text-align: center;}
-        
-        /* ★ KANJI ID (Big & Impactful) ★ */
-        .id-kanji {
-            font-family: 'Noto Sans JP', sans-serif;
-            font-size: 52px; font-weight: 900; color: var(--primary);
-            margin: 10px 0 5px; letter-spacing: 2px; line-height: 1.2;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.05);
-        }
-
-        /* Type Image */
-        .type-img-container {
-            width: 100%; max-width: 240px; margin: 10px auto 20px;
-            border-radius: 16px; overflow: hidden; display: none; /* Hidden until loaded */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .type-img { width: 100%; height: auto; display: block; }
-
-        .id-title { font-size: 18px; font-weight: 700; margin: 0 0 10px; color: var(--accent); letter-spacing: 0px; text-transform: uppercase;}
-        .id-desc { font-size: 13px; color: var(--secondary); line-height: 1.6; margin-bottom: 20px; text-align: left;}
-        
-        /* Action Buttons */
-        .tribe-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .tribe-btn { 
-            font-size: 11px; padding: 12px; border-radius: 8px; background: white; 
-            color: var(--primary); text-align: center; text-decoration: none; 
-            border: 1px solid var(--border); font-weight: 700; 
-            display:flex; align-items:center; justify-content:center; gap:6px; cursor: pointer;
-        }
-        /* Discord Button Style */
-        .tribe-btn.discord { 
-            background: #5865F2; color: white; border:none; 
-            grid-column: span 2; /* Full width */
-            font-size: 13px; padding: 14px;
-        }
-        .tribe-btn:active { transform: scale(0.98); }
-
-        /* Map Controls */
-        .controls { display: flex; padding: 10px 24px; gap: 8px; background: white; border-bottom: 1px solid var(--border); flex-shrink: 0;}
-        .ctrl-pill { padding: 6px 14px; font-size: 12px; font-weight: 700; border-radius: 20px; cursor: pointer; background: #f1f5f9; color: var(--secondary); }
-        .ctrl-pill.active { background: var(--primary); color: white; }
-        .ctrl-share { margin-left: auto; display:flex; gap:5px;}
-        
-        /* Map Area */
-        #map-container { flex-grow: 1; background: #e5e7eb; position: relative; z-index: 1; width: 100%; height: 100%; min-height: 300px;}
-        #map { width: 100%; height: 100%; }
-
-        /* Bottom Sheet */
-        .spot-card {
-            background: white; border-top: 1px solid var(--border); padding: 24px;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.1); z-index: 999; flex-shrink: 0;
-        }
-        .spot-n { font-size: 16px; font-weight: 800; margin: 0; }
-        .spot-d { font-size: 12px; color: var(--secondary); margin-bottom: 15px; }
-        .actions { display: flex; gap: 10px; }
-        .act-btn { flex: 1; padding: 14px; border-radius: 12px; font-size: 13px; font-weight: 700; text-align: center; cursor: pointer; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; gap: 6px; text-decoration: none; color: var(--primary); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
-        
-        /* ★ SAVE ANIMATION ★ */
-        .act-save { transition: background-color 0.3s, border-color 0.3s, color 0.3s; }
-        .act-save.saved { 
-            background-color: var(--pink); 
-            color: white; 
-            border-color: var(--pink); 
-            animation: pop 0.4s ease-out;
-        }
-        .act-vibe { background: var(--primary); color: white; border-color: var(--primary); }
-
-        @keyframes pop {
-            0% { transform: scale(1); }
-            40% { transform: scale(1.15); }
-            100% { transform: scale(1); }
-        }
-
+        /* Styles */
+        :root { --primary: #111827; --secondary: #6b7280; --accent: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --pink: #ff007f; --discord: #5865F2; --scale-5: #111827; --scale-4: #4b5563; --scale-3: #9ca3af; --scale-2: #d1d5db; --scale-1: #f3f4f6; }
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--primary); margin: 0; line-height: 1.6; }
+        .container { background: var(--surface); max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
         .hidden { display: none !important; }
         
-        /* ★ PIN STYLES ★ */
-        img.leaflet-marker-icon { transition: all 0.3s; }
-        .pin-sys { filter: hue-rotate(140deg) brightness(0.9); } /* Greenish */
+        /* Auth UI */
+        .auth-bar { padding: 10px 20px; background: #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; border-bottom: 1px solid var(--border); }
+        .auth-status { color: var(--primary); }
+        .auth-btn { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; }
+        #login-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 350px; text-align: center; }
+        .modal-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin: 15px 0; font-size: 16px; }
         
-        /* Pink Pin: Blue(240) + 90 = 330(Pink) */
-        .pin-sav { 
-            filter: hue-rotate(90deg) saturate(3) brightness(1.2); 
-            transform: scale(1.5) translateY(-15px); 
-            z-index: 1000 !important; 
-        } 
+        /* Header & Buttons */
+        .header { padding: 60px 24px 40px; }
+        .brand-tag { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; display: block; margin-bottom: 10px; }
+        h1 { font-size: 36px; font-weight: 900; margin: 0; line-height: 1.1; letter-spacing: -1.5px; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: 700; margin-top: 30px; cursor: pointer; display: flex; justify-content: space-between; font-size: 16px; }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Quiz & Result Styles */
+        .opt-btn { width: 100%; padding: 14px; border: 1px solid var(--border); background: white; margin-bottom: 8px; border-radius: 12px; text-align: left; font-weight: 600; cursor: pointer; }
+        .opt-5 { border-left: 6px solid var(--scale-5); } .opt-4 { border-left: 4px solid var(--scale-4); } .opt-3 { border-left: 2px solid var(--scale-3); } .opt-2 { border-left: 1px solid var(--scale-2); } .opt-1 { border-left: 1px solid var(--scale-1); }
+        
+        /* Result */
+        .id-kanji { font-size: 52px; font-weight: 900; margin: 10px 0; letter-spacing: 4px; }
+        .tribe-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+        .tribe-btn { padding: 12px; border: 1px solid var(--border); background: white; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none; color: var(--primary); }
+        .tribe-btn.discord { grid-column: span 2; background: var(--discord); color: white; border: none; }
+        
+        /* Map */
+        #map-container { flex-grow: 1; min-height: 300px; background: #e5e7eb; position: relative; z-index: 1; }
+        #map { width: 100%; height: 100%; }
+        .spot-card { padding: 20px; background: white; border-top: 1px solid var(--border); z-index: 100; }
+        .actions { display: flex; gap: 10px; margin-top: 10px; }
+        .act-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); text-align: center; font-weight: 700; cursor: pointer; font-size: 13px; text-decoration: none; color: var(--primary); display: flex; justify-content: center; align-items: center; gap: 5px; }
+        .act-save.saved { background: var(--pink); color: white; border-color: var(--pink); animation: pop 0.4s ease; }
+        @keyframes pop { 50% { transform: scale(1.1); } }
+        
+        /* Lang Switch */
+        .lang-switch { position: absolute; top: 20px; right: 20px; font-size: 11px; font-weight: 800; background: white; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); cursor: pointer; z-index: 20; }
+        
+        /* Pins */
+        .pin-sys { filter: hue-rotate(140deg) brightness(0.9); }
+        .pin-sav { filter: hue-rotate(320deg) saturate(3) brightness(1.2); transform: scale(1.5) translateY(-15px); z-index: 1000 !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="lang-switch" onclick="toggleLang()" id="lang-btn">EN / JP</div>
+    <div class="auth-bar">
+        <span id="user-display" class="auth-status">Guest Mode</span>
+        <button id="auth-action-btn" class="auth-btn" onclick="openLoginModal()">Login to Save</button>
+    </div>
 
-    <div id="start-screen" class="header">
+    <div id="login-modal" class="hidden">
+        <div class="modal-content">
+            <h2>Log in / Sign up</h2>
+            <p style="font-size:12px; color:#666; margin-bottom:10px;">Enter email to receive a magic link.</p>
+            <input type="email" id="email-input" class="modal-input" placeholder="your@email.com">
+            <button class="btn-primary" onclick="handleLogin()" style="margin-top:10px;">Send Magic Link</button>
+            <button onclick="closeLoginModal()" style="background:none; border:none; color:#999; margin-top:15px; cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+
+    <button class="lang-switch" onclick="toggleLang()" id="lang-btn">EN / JP</button>
+
+    <section id="start-screen" class="header">
         <span class="brand-tag">Travel ID</span>
         <h1 id="t-head">Decode Your<br>Travel DNA.</h1>
-        <p class="hero-sub" id="t-sub">We don't match you by demographics.<br>We match you by values.</p>
+        <p style="color:#6b7280; margin-top:10px;">We don't match you by demographics.<br>We match you by values.</p>
         <button class="btn-primary" onclick="startQuiz()">
             <span id="t-start">Analyze My Style</span> <span>→</span>
         </button>
-        <div style="margin-top:40px; border-top:1px solid #f1f5f9; padding-top:20px;">
-            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v28.0 (Impact & Vibe)</p>
-        </div>
-    </div>
+    </section>
 
-    <div id="quiz-screen" class="hidden">
-        <div class="progress-track"><div class="progress-bar" id="progress"></div></div>
-        <span class="q-cat" id="q-cat">CATEGORY</span>
-        <div class="q-text" id="q-text">Loading...</div>
+    <section id="quiz-screen" class="hidden" style="padding: 60px 24px;">
+        <div style="height:6px; background:#f1f5f9; border-radius:3px; margin-bottom:20px;"><div id="progress" style="height:100%; width:0%; background:#111827; transition:0.3s;"></div></div>
+        <span id="q-cat" style="font-size:10px; font-weight:800; color:#2563eb;">CATEGORY</span>
+        <h2 id="q-text" style="font-size:20px; font-weight:800; margin:10px 0 30px;">Loading...</h2>
         <div id="options-box"></div>
-        <div style="margin-top:20px; text-align:center;">
-            <span onclick="prevQ()" style="font-size:12px; color:#9ca3af; cursor:pointer; text-decoration:underline;">Back</span>
-        </div>
-    </div>
+    </section>
 
-    <div id="result-screen" class="hidden">
-        <div class="res-header">
-            <span class="brand-tag">YOUR SEGMENT</span>
+    <section id="mbti-screen" class="hidden" style="padding: 60px 24px;">
+        <h2 style="font-size:24px; font-weight:900;">One last thing...</h2>
+        <p style="margin-bottom:20px; font-size:14px; color:#666;">What is your MBTI?</p>
+        <select id="mbti-select" style="width:100%; padding:15px; border-radius:12px; border:2px solid #e2e8f0; font-size:16px; font-weight:700;">
+            <option value="" disabled selected>Select MBTI</option>
+            <option value="INTJ">INTJ</option><option value="INTP">INTP</option><option value="ENTJ">ENTJ</option><option value="ENTP">ENTP</option>
+            <option value="INFJ">INFJ</option><option value="INFP">INFP</option><option value="ENFJ">ENFJ</option><option value="ENFP">ENFP</option>
+            <option value="ISTJ">ISTJ</option><option value="ISFJ">ISFJ</option><option value="ESTJ">ESTJ</option><option value="ESFJ">ESFJ</option>
+            <option value="ISTP">ISTP</option><option value="ISFP">ISFP</option><option value="ESTP">ESTP</option><option value="ESFP">ESFP</option>
+        </select>
+        <button class="btn-primary" onclick="submitMBTI()">See Results →</button>
+    </section>
+
+    <section id="result-screen" class="hidden">
+        <div class="header" style="padding-bottom:20px; text-align:center;">
+            <div id="res-kanji" class="id-kanji">【 】</div>
+            <h2 id="res-id" style="font-size:18px; font-weight:700; color:#2563eb; text-transform:uppercase;">LOADING</h2>
+            <div id="res-mbti" style="font-size:12px; font-weight:800; background:#eef2ff; padding:4px 10px; border-radius:20px; display:inline-block; margin-bottom:10px;">MBTI</div>
             
-            <div class="id-kanji" id="res-kanji">【 】</div>
-            <h1 class="id-title" id="res-id">Loading...</h1>
-
-            <div class="type-img-container" id="img-container">
-                <img id="type-image" class="type-img" src="" alt="Type Illustration" onerror="this.parentElement.style.display='none'">
+            <div id="img-container" style="max-width:200px; margin:0 auto 15px; border-radius:12px; overflow:hidden; display:none;">
+                <img id="type-image" style="width:100%; display:block;" src="" onerror="this.parentElement.style.display='none'">
             </div>
 
-            <p class="id-desc" id="res-desc">Analysis complete.</p>
+            <p id="res-desc" style="font-size:13px; color:#6b7280; text-align:left; margin-bottom:20px;">Analysis complete.</p>
             
             <div class="tribe-actions">
-                <button class="tribe-btn discord" onclick="copyDiscordProfile()">
-                    <span>📋</span> <span id="btn-discord">Copy Profile for Discord</span>
-                </button>
-                <a href="https://forms.gle/5L7ndRzgPnh45Mor8" target="_blank" class="tribe-btn">
-                    <span>⚡</span> <span id="btn-submit">Submit Spot</span>
-                </a>
-                <div class="tribe-btn" onclick="shareTwitter()">
-                    <span>𝕏</span> Share
-                </div>
+                <button class="tribe-btn discord" onclick="copyDiscordProfile()">📋 Copy Profile for Discord</button>
+                <a href="https://forms.gle/5L7ndRzgPnh45Mor8" target="_blank" class="tribe-btn">⚡ Submit Spot</a>
+                <button class="tribe-btn" onclick="shareTwitter()">𝕏 Share</button>
             </div>
         </div>
 
-        <div class="controls">
-            <div class="ctrl-pill active" onclick="setMode('japan')" id="opt-japan">Japan</div>
-            <div class="ctrl-pill" onclick="setMode('world')" id="opt-world">Global</div>
-            <div class="ctrl-share">
-                <div class="ctrl-pill" onclick="shareUrl()">🔗 Copy URL</div>
-            </div>
+        <div style="padding:10px 24px; display:flex; gap:10px; border-bottom:1px solid #e2e8f0;">
+            <button id="opt-japan" class="tribe-btn" style="background:#111827; color:white; border:none;" onclick="setMode('japan')">Japan</button>
+            <button id="opt-world" class="tribe-btn" onclick="setMode('world')">Global</button>
+            <button class="tribe-btn" style="margin-left:auto;" onclick="shareUrl()">🔗 URL</button>
         </div>
 
         <div id="map-container"><div id="map"></div></div>
 
         <div class="spot-card">
-            <h3 class="spot-n" id="spot-name">Map Loading...</h3>
-            <p class="spot-d" id="spot-desc">Select a pin to reveal spots.</p>
+            <h3 id="spot-name" style="margin:0; font-size:16px;">Map Loading...</h3>
+            <p id="spot-desc" style="font-size:12px; color:#666; margin-bottom:15px;">Select a pin.</p>
             <div class="actions">
-                <button class="act-btn act-save" id="btn-save" onclick="toggleSave()">
-                    <span id="icon-save">♡</span> <span id="txt-save">Save</span>
-                </button>
-                <a href="#" target="_blank" class="act-btn act-vibe" id="btn-insta">
-                    <span>▶</span> <span id="txt-insta">Vibe</span>
-                </a>
+                <button id="btn-save" class="act-btn act-save" onclick="toggleSave()">♡ Save</button>
+                <a id="btn-insta" href="#" target="_blank" class="act-btn act-vibe" style="display:flex; justify-content:center; align-items:center; text-decoration:none;">▶ Vibe</a>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-
 <script>
-    // --- 1. CONFIGURATION ---
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrOI46FP-ueet2ZD0xKG0r1_xFng90_PDr1Z-sm6OB5xe3I8m0nx5Q5aNIVxvRVi1QLczBbv4pdnAv/pub?output=csv'; 
+    // ==========================================
+    // ★ SUPABASE CONFIG - YOUR KEYS ARE HERE! ★
+    // ==========================================
+    const SUPABASE_URL = 'https://zqghkzukkzmpszdxyqgf.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxZ2hrenVra3ptcHN6ZHh5cWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImV4cCI6MjA4NDc1NDY0Nn0.2-ng4M5LLMkTcQp5pqzg8INEQbDef1HQS4zxFWg_DXg';
+    // ==========================================
+
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrOI46FP-ueet2ZD0xKG0r1_xFng90_PDr1Z-sm6OB5xe3I8m0nx5Q5aNIVxvRVi1QLczBbv4pdnAv/pub?output=csv';
     
-    // --- 2. STATE ---
-    let lang = 'en'; 
-    let mode = 'japan'; 
-    let finalId = ""; // e.g. "泥攻孤遊"
-    let map = null;
-    let markers = [];
-    let dataCache = {};
-    let saved = new Set();
-    let curSpot = null;
+    // Init Supabase
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- 3. LOGIC ---
-    function init(){
-        const urlParams = new URLSearchParams(window.location.search);
-        const sharedId = urlParams.get('id');
-        const localSaved = JSON.parse(localStorage.getItem('tid_saved') || '[]');
-        saved = new Set(localSaved);
+    let state = { lang: 'en', mode: 'japan', finalId: "", mbti: "", map: null, markers: [], data: {}, saved: new Set(), qIdx: 0, scores: {mud:0, clean:0, flow:0, order:0, active:0, safe:0, solo:0, social:0}, user: null };
 
-        fetchData(() => {
-            if(sharedId) {
-                finalId = sharedId;
-                showResultScreen();
-            } else {
-                updateUIText();
-            }
-        });
-    }
+    // Questions (1-Axis Statements)
+    const Q = [
+        { cat: "ENVIRONMENT", ja: "絶景が見られるなら、不衛生な小屋に泊まることも厭わない。", en: "I would stay in a dirty hut if it meant seeing a spectacular view.", pos:{mud:2}, neg:{clean:2} },
+        { cat: "CONSUMPTION", ja: "リスクがあっても、得体の知れない現地の屋台料理を食べてみたい。", en: "I am willing to eat mysterious local street food despite the risks.", pos:{mud:2}, neg:{clean:2} },
+        { cat: "ISOLATION", ja: "文明から切断された不便な場所は、私にとって苦痛ではなく「解放」だ。", en: "Being cut off from civilization feels more like 'freedom' than 'pain'.", pos:{mud:1,solo:1}, neg:{clean:1,social:1} },
+        { cat: "UNCERTAINTY", ja: "地図を持たずに迷子になることは、ストレスではなく「喜び」だ。", en: "Getting lost without a map is a joy, not a stress.", pos:{flow:2}, neg:{order:2} },
+        { cat: "CONTROL", ja: "分単位で完璧なスケジュールが決まっていると、安心する。", en: "I feel safe when my schedule is planned down to the minute.", pos:{order:2}, neg:{flow:2} },
+        { cat: "ADAPTABILITY", ja: "旅のトラブルは「エラー」ではなく「ドラマ」だと思う。", en: "Travel troubles are 'drama' to be enjoyed, not 'errors' to be fixed.", pos:{flow:2}, neg:{order:2} },
+        { cat: "INTENSITY", ja: "旅の目的は「癒やし」よりも「消耗（全力を出し切ること）」だ。", en: "The goal of travel is exhaustion (giving my all) rather than healing.", pos:{active:2}, neg:{safe:2} },
+        { cat: "RISK", ja: "治安の悪いスラム街を、安全なバスから見るより降りて歩きたい。", en: "I'd rather walk through a gritty slum than watch it from a safe bus.", pos:{active:2}, neg:{safe:2} },
+        { cat: "INVESTMENT", ja: "予算を使うなら「極上の安息」より「極限の体験」に使いたい。", en: "I'd invest in an 'extreme experience' rather than 'luxury rest'.", pos:{active:2}, neg:{safe:2} },
+        { cat: "SOLITUDE", ja: "大自然の中で一人でいる時、寂しさよりも全能感を感じる。", en: "Alone in nature, I feel empowerment rather than loneliness.", pos:{solo:2}, neg:{social:2} },
+        { cat: "CONNECTION", ja: "言葉が通じなくても、現地の人の中に飛び込んで交流したい。", en: "I want to dive in and interact with locals even if we don't speak the same language.", pos:{social:2}, neg:{solo:2} },
+        { cat: "PARTNER", ja: "旅のパートナーは、従順な人より「私を振り回すクレイジーな人」がいい。", en: "I prefer a crazy partner who drags me around over an obedient one.", pos:{social:1,flow:1}, neg:{solo:1,order:1} },
+        { cat: "CORE", ja: "私にとって旅とは「日常の回復」ではなく「価値観の破壊」だ。", en: "To me, travel is about destroying values, not restoring daily life.", pos:{active:2,mud:1}, neg:{safe:2,clean:1} }
+    ];
 
-    function fetchData(callback){
-        Papa.parse(CSV_URL, {
-            download: true, header: true, skipEmptyLines: true,
-            complete: res => {
-                res.data.forEach(r => {
-                    if(r.id){
-                        const k = r.id.trim();
-                        if(!dataCache[k]) dataCache[k] = [];
-                        dataCache[k].push({
-                            uid: r.uid || Math.random().toString(), 
-                            name_jp: r.rec_jp, name_en: r.rec_en,
-                            desc: r.desc, tag: r.tag ? r.tag.trim() : "",
-                            lat: parseFloat(r.lat), lng: parseFloat(r.lng), 
-                            zoom: parseInt(r.zoom)||12, region: r.region ? r.region.trim().toLowerCase() : 'japan'
-                        });
-                    }
-                });
-                if(callback) callback();
-            }
-        });
-    }
-
-    // --- BRAND DATA ---
     const T = {
-        en: {
-            head: "Decode Your\nTravel DNA.", sub: "We don't match you by demographics.\nWe match you by values.",
-            start: "Analyze My Style", save: "Save", saved: "Saved!", vibe: "View Vibe",
-            world: "Global", japan: "Domestic", 
-            discord: "Copy Profile for Discord", submit: "Submit Spot",
+        en: { 
             types: {
                 "泥攻孤遊": { t: "The Unfiltered Explorer", d: "Raw × Intense × Solo × Spontaneous.\nA nomad who seeks truth over comfort. You find beauty in the chaos that others reject." },
                 "浄安共律": { t: "The Aesthetic Planner", d: "Refined × Gentle × Social × Structured.\nA guardian of beauty. You curate perfect harmony and reject the noise of the world." },
                 "泥安共遊": { t: "The Immersion Seeker", d: "Raw × Gentle × Social × Spontaneous.\nA connector of souls. You dive into local life with an open heart and zero judgement." },
                 "浄攻孤律": { t: "The Noble Sniper", d: "Refined × Intense × Solo × Structured.\nA stoic perfectionist. You don't tour; you hunt for the sublime moment in solitude." },
-                "fallback": { t: "The Unique Voyager", d: "Your value map is unique. Based on your traits, we've matched you with the closest tribe." }
+                "fallback": { t: "The Unique Voyager", d: "Your value map is unique. Explore the map to find your tribe." }
             }
         },
         ja: {
-            head: "旅のDNAを\n解読する。", sub: "属性ではなく、\n「価値観」で世界を再定義する。",
-            start: "スタイルを分析", save: "保存", saved: "保存完了", vibe: "動画を見る",
-            world: "世界", japan: "日本",
-            discord: "Discord用プロフをコピー", submit: "聖地をタレこむ",
             types: {
                 "泥攻孤遊": { t: "The Unfiltered Explorer", d: "【Raw × Intense × Solo × Spontaneous】\n飾らない探究者。安全な飼育小屋より、傷だらけの荒野を選ぶ。カオスの中にこそ「生」がある。" },
                 "浄安共律": { t: "The Aesthetic Planner", d: "【Refined × Gentle × Social × Structured】\n美学ある計画者。ノイズを徹底して排除し、地上に完璧な楽園（サンクチュアリ）を設計する。" },
                 "泥安共遊": { t: "The Immersion Seeker", d: "【Raw × Gentle × Social × Spontaneous】\n没入する人。清濁併せ呑む最強の免疫力で、どんな路地裏にも「愛」を見つけ出す。" },
                 "浄攻孤律": { t: "The Noble Sniper", d: "【Refined × Intense × Solo × Structured】\n孤高の狙撃手。妥協なき美意識。あなたがするのは観光ではない、美を撃ち抜く「狩り」だ。" },
-                "fallback": { t: "The Unique Voyager", d: "独自の旅のスタイルを持っています。あなたの価値観に最も近い部族（トライド）の地図を表示します。" }
+                "fallback": { t: "The Unique Voyager", d: "独自の旅のスタイルを持っています。マップを探索して、あなたのトライド（部族）を見つけましょう。" }
             }
         }
     };
 
-    const Q = [
-        { cat: "ENVIRONMENT", ja: "絶景の代償が不衛生な小屋だとしても、そこに泊まるか？", en: "Would you sleep in a dirty hut for a priceless view?", pos:{mud:2}, neg:{clean:2} },
-        { cat: "CONSUMPTION", ja: "得体の知れない現地の屋台料理。リスクを負ってでも食べるか？", en: "Do you eat mysterious local street food despite risks?", pos:{mud:2}, neg:{clean:2} },
-        { cat: "ISOLATION", ja: "文明から切断された不便な場所。それは苦痛か、解放か？", en: "Is total isolation from civilization 'pain' or 'freedom'?", pos:{mud:1,solo:1}, neg:{clean:1,social:1} },
-        { cat: "UNCERTAINTY", ja: "地図を持たずに迷子になること。それはストレスか、喜びか？", en: "Is getting lost without a map 'stress' or 'joy'?", pos:{flow:2}, neg:{order:2} },
-        { cat: "CONTROL", ja: "分単位で完璧なスケジュール。安心するか、息苦しいか？", en: "Does a perfect schedule make you feel 'safe' or 'trapped'?", pos:{order:2}, neg:{flow:2} },
-        { cat: "ADAPTABILITY", ja: "旅のトラブルは「エラー」か、それとも「ドラマ」か？", en: "Are travel troubles 'errors' or 'drama'?", pos:{flow:2}, neg:{order:2} },
-        { cat: "INTENSITY", ja: "旅の目的は「癒やし」か、それとも「消耗」か？", en: "Is the goal of travel 'healing' or 'exhaustion'?", pos:{safe:2}, neg:{active:2} },
-        { cat: "RISK", ja: "治安の悪いスラム街。安全圏から見るか、降りて歩くか？", en: "Would you walk inside a gritty slum or watch from a bus?", pos:{active:2}, neg:{safe:2} },
-        { cat: "INVESTMENT", ja: "予算を使うなら「極上の安息」か、「極限の体験」か？", en: "Invest in 'luxury rest' or 'extreme experience'?", pos:{safe:2}, neg:{active:2} },
-        { cat: "SOLITUDE", ja: "大自然の中での孤独。寂しいか、全能感を感じるか？", en: "Alone in nature: Do you feel 'lonely' or 'empowered'?", pos:{solo:2}, neg:{social:2} },
-        { cat: "CONNECTION", ja: "言葉の通じない現地人との交流。避けるか、飛び込むか？", en: "Interacting with locals: Avoid or Dive in?", pos:{social:2}, neg:{solo:2} },
-        { cat: "PARTNER", ja: "同行者は「従順な人」か、「振り回してくる人」か？", en: "Partner preference: 'Obedient' or 'Crazy'?", pos:{social:1,flow:1}, neg:{solo:1,order:1} },
-        { cat: "CORE", ja: "旅とは「日常の回復」か、それとも「価値観の破壊」か？", en: "Travel is: 'Restoring daily life' or 'Destroying values'?", pos:{active:2,mud:1}, neg:{safe:2,clean:1} }
-    ];
-
-    let qIdx = 0;
-    let scores = {mud:0, clean:0, flow:0, order:0, active:0, safe:0, solo:0, social:0};
-
-    function toggleLang(){
-        lang = lang==='en' ? 'ja' : 'en';
-        updateUIText();
-        if(finalId) updateResultUI(); 
-        else if(qIdx>0) renderQ(); 
+    // --- AUTH LOGIC ---
+    async function checkUser() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            state.user = session.user;
+            updateAuthUI();
+            await loadProfile(); 
+        }
+        // If not logged in, fallback to localStorage is already handled in init
     }
 
-    function updateUIText(){
-        const t = T[lang];
-        document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
-        document.getElementById('t-sub').innerHTML = t.sub.replace('\n', '<br>');
-        document.getElementById('t-start').innerText = t.start;
-        document.getElementById('lang-btn').innerText = lang==='en' ? "EN / JP" : "JP / EN";
+    async function handleLogin() {
+        const email = document.getElementById('email-input').value;
+        if (!email) return alert("Enter email");
+        const { error } = await supabase.auth.signInWithOtp({ email });
+        if (error) alert("Error: " + error.message);
+        else alert("Magic Link sent! Check your email to login.");
+        closeLoginModal();
     }
 
-    function startQuiz(){
-        document.getElementById('start-screen').classList.add('hidden');
-        document.getElementById('quiz-screen').classList.remove('hidden');
-        renderQ();
+    async function handleLogout() {
+        await supabase.auth.signOut();
+        location.reload();
     }
 
-    function renderQ(){
-        if(qIdx >= Q.length){ finishQuiz(); return; }
-        const q = Q[qIdx];
-        document.getElementById('q-cat').innerText = q.cat;
-        document.getElementById('q-text').innerText = lang==='ja' ? q.ja : q.en;
-        document.getElementById('progress').style.width = `${((qIdx)/Q.length)*100}%`;
-        
-        const box = document.getElementById('options-box');
-        box.innerHTML = '';
-        const opts = [
-            { l: lang==='ja'?"強くそう思う":"Strongly Agree", w: 2, c: "opt-5" },
-            { l: lang==='ja'?"そう思う":"Agree", w: 1, c: "opt-4" },
-            { l: lang==='ja'?"どちらでもない":"Neutral", w: 0, c: "opt-3" },
-            { l: lang==='ja'?"そう思わない":"Disagree", w: -1, c: "opt-2" },
-            { l: lang==='ja'?"全くそう思わない":"Strongly Disagree", w: -2, c: "opt-1" }
-        ];
-        opts.forEach(o => {
-            const btn = document.createElement('div');
-            btn.className = `opt-btn ${o.c}`;
-            btn.innerHTML = `<span>${o.l}</span>`; 
-            btn.onclick = () => {
-                if(o.w > 0) Object.keys(q.pos).forEach(k => scores[k] += q.pos[k] * o.w);
-                if(o.w < 0) Object.keys(q.neg).forEach(k => scores[k] += q.neg[k] * Math.abs(o.w));
-                qIdx++; renderQ();
-            };
-            box.appendChild(btn);
+    function updateAuthUI() {
+        const d = document.getElementById('user-display');
+        const b = document.getElementById('auth-action-btn');
+        if (state.user) {
+            d.innerText = "Logged in";
+            b.innerText = "Logout";
+            b.onclick = handleLogout;
+        }
+    }
+
+    async function saveProfile() {
+        if (!state.user) return;
+        const updates = {
+            id: state.user.id,
+            updated_at: new Date(),
+            saved_spots: Array.from(state.saved),
+            final_id: state.finalId,
+            mbti: state.mbti
+        };
+        await supabase.from('profiles').upsert(updates);
+    }
+
+    async function loadProfile() {
+        if (!state.user) return;
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', state.user.id).single();
+        if (data && data.saved_spots) {
+            state.saved = new Set(data.saved_spots);
+            // If we wanted to restore their previous result, we could do: state.finalId = data.final_id;
+            if (state.map) updateMap();
+        }
+    }
+
+    // --- APP LOGIC ---
+    function init(){
+        checkUser(); 
+        // LocalStorage fallback
+        const localSaved = JSON.parse(localStorage.getItem('tid_saved') || '[]');
+        if(!state.user && localSaved.length > 0) state.saved = new Set(localSaved);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedId = urlParams.get('id');
+
+        fetchData(() => {
+            if(sharedId) {
+                state.finalId = sharedId;
+                showResultScreen();
+            } else {
+                renderQ();
+            }
         });
     }
 
-    function prevQ(){ if(qIdx > 0){ qIdx--; renderQ(); } else { location.reload(); } }
+    function fetchData(cb) {
+        Papa.parse(CSV_URL, { download: true, header: true, skipEmptyLines: true, complete: res => {
+            res.data.forEach(r => {
+                if(r.id){
+                    const k = r.id.trim();
+                    if(!state.data[k]) state.data[k] = [];
+                    state.data[k].push({
+                        uid: r.uid || Math.random().toString(),
+                        name_jp: r.rec_jp, name_en: r.rec_en, desc: r.desc, tag: r.tag,
+                        lat: parseFloat(r.lat), lng: parseFloat(r.lng), zoom: parseInt(r.zoom)||12, region: r.region?r.region.trim():'japan'
+                    });
+                }
+            });
+            if(cb) cb();
+        }});
+    }
 
-    function finishQuiz(){
-        const axis1 = scores.mud >= scores.clean ? "泥" : "浄";
-        const axis2 = scores.active >= scores.safe ? "攻" : "安";
-        const axis3 = scores.social >= scores.solo ? "共" : "孤";
-        const axis4 = scores.flow >= scores.order ? "遊" : "律";
-        finalId = axis1 + axis2 + axis3 + axis4;
+    function startQuiz(){ document.getElementById('start-screen').classList.add('hidden'); document.getElementById('quiz-screen').classList.remove('hidden'); renderQ(); }
+    
+    function renderQ(){
+        if(state.qIdx >= Q.length){ document.getElementById('quiz-screen').classList.add('hidden'); document.getElementById('mbti-screen').classList.remove('hidden'); return; }
+        const q = Q[state.qIdx];
+        document.getElementById('q-cat').innerText = q.cat;
+        document.getElementById('q-text').innerText = state.lang==='ja' ? q.ja : q.en;
+        document.getElementById('progress').style.width = `${((state.qIdx)/Q.length)*100}%`;
+        const box = document.getElementById('options-box'); box.innerHTML='';
+        const opts = [{l:state.lang==='ja'?"強くそう思う":"Strongly Agree", w:2, c:"opt-5"}, {l:state.lang==='ja'?"そう思う":"Agree", w:1, c:"opt-4"}, {l:state.lang==='ja'?"どちらでもない":"Neutral", w:0, c:"opt-3"}, {l:state.lang==='ja'?"そう思わない":"Disagree", w:-1, c:"opt-2"}, {l:state.lang==='ja'?"全くそう思わない":"Strongly Disagree", w:-2, c:"opt-1"}];
+        opts.forEach(o=>{
+            const b = document.createElement('button'); b.className = `opt-btn ${o.c}`; b.innerHTML=o.l;
+            b.onclick = ()=>{ 
+                if(o.w>0) Object.keys(q.pos).forEach(k=>state.scores[k]+=q.pos[k]*o.w);
+                if(o.w<0) Object.keys(q.neg).forEach(k=>state.scores[k]+=q.neg[k]*Math.abs(o.w));
+                state.qIdx++; renderQ();
+            };
+            box.appendChild(b);
+        });
+    }
+
+    function submitMBTI(){
+        state.mbti = document.getElementById('mbti-select').value;
+        if(!state.mbti) return alert("Select MBTI");
+        if(state.mbti.includes('E')) state.scores.social += 2;
+        if(state.mbti.includes('I')) state.scores.solo += 2;
+        if(state.mbti.includes('J')) state.scores.order += 2;
+        if(state.mbti.includes('P')) state.scores.flow += 2;
+        
+        const axis1 = state.scores.mud >= state.scores.clean ? "泥" : "浄";
+        const axis2 = state.scores.active >= state.scores.safe ? "攻" : "安";
+        const axis3 = state.scores.social >= state.scores.solo ? "共" : "孤";
+        const axis4 = state.scores.flow >= state.scores.order ? "遊" : "律";
+        state.finalId = axis1+axis2+axis3+axis4;
+        
+        document.getElementById('mbti-screen').classList.add('hidden');
         showResultScreen();
+        saveProfile();
     }
 
     function showResultScreen(){
-        document.getElementById('start-screen').classList.add('hidden');
-        document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
-        updateResultUI();
-        setTimeout(() => { initMap(); if(map) map.invalidateSize(); }, 200);
-    }
-
-    function updateResultUI(){
-        document.getElementById('res-kanji').innerText = `【 ${finalId} 】`;
-
-        // Image Logic: Try to load ./images/泥攻孤遊.png
+        document.getElementById('res-kanji').innerText = `【 ${state.finalId} 】`;
+        document.getElementById('res-mbti').innerText = `MBTI: ${state.mbti}`;
+        
         const img = document.getElementById('type-image');
-        const imgCon = document.getElementById('img-container');
-        img.src = `./images/${finalId}.png`;
-        img.onload = () => { imgCon.style.display = 'block'; };
-        // onerror is handled inline
+        img.src = `./images/${state.finalId}.png`;
+        img.onload = ()=>document.getElementById('img-container').style.display='block';
 
-        let tData = T[lang].types[finalId];
-        if(!tData){
-            if(finalId.includes("泥") && finalId.includes("攻")) tData = T[lang].types["泥攻孤遊"];
-            else if(finalId.includes("浄") && finalId.includes("安")) tData = T[lang].types["浄安共律"];
-            else if(finalId.includes("泥") && finalId.includes("共")) tData = T[lang].types["泥安共遊"];
-            else if(finalId.includes("浄") && finalId.includes("攻")) tData = T[lang].types["浄攻孤律"];
-            else tData = T[lang].types["fallback"];
+        let tData = T[state.lang].types[state.finalId];
+        if(!tData) {
+            if(state.finalId.includes("泥") && state.finalId.includes("攻")) tData = T[state.lang].types["泥攻孤遊"];
+            else if(state.finalId.includes("浄") && state.finalId.includes("安")) tData = T[state.lang].types["浄安共律"];
+            else if(state.finalId.includes("泥") && state.finalId.includes("共")) tData = T[state.lang].types["泥安共遊"];
+            else if(state.finalId.includes("浄") && state.finalId.includes("攻")) tData = T[state.lang].types["浄攻孤律"];
+            else tData = T[state.lang].types["fallback"];
         }
-
         document.getElementById('res-id').innerText = tData.t;
         document.getElementById('res-desc').innerText = tData.d;
         
-        const t = T[lang];
-        document.getElementById('btn-discord').innerText = t.discord;
-        document.getElementById('btn-submit').innerText = t.submit;
-        document.getElementById('opt-world').innerText = t.world;
-        document.getElementById('opt-japan').innerText = t.japan;
-        document.getElementById('txt-save').innerText = t.save;
-        document.getElementById('txt-insta').innerText = t.vibe;
-
-        if(map) updateMap();
-    }
-
-    function setMode(m){
-        mode = m;
-        document.getElementById('opt-world').classList.toggle('active', m==='world');
-        document.getElementById('opt-japan').classList.toggle('active', m==='japan');
-        updateMap();
+        setTimeout(()=>{
+            if(!state.map) initMap();
+            else state.map.invalidateSize();
+            updateMap();
+        }, 200);
     }
 
     function initMap(){
-        if(map) { map.invalidateSize(); return; }
-        map = L.map('map');
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; CARTO', maxZoom: 19
-        }).addTo(map);
-        updateMap();
+        state.map = L.map('map');
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {attribution:'&copy; CARTO', maxZoom:19}).addTo(state.map);
     }
 
     function updateMap(){
-        if(!map) return;
-        markers.forEach(m => map.removeLayer(m));
-        markers = [];
+        if(!state.map) return;
+        state.map.eachLayer(l => { if(l instanceof L.Marker) state.map.removeLayer(l); });
         
-        let rawSpots = dataCache[finalId];
-        if(!rawSpots || rawSpots.length === 0){
-             const keys = Object.keys(dataCache);
-             for(let k of keys){
-                 if(finalId.includes(k.substring(0,2))) { rawSpots = dataCache[k]; break; }
-             }
-             if(!rawSpots) rawSpots = Object.values(dataCache).flat();
+        let raw = state.data[state.finalId] || [];
+        if(raw.length===0) {
+             const keys = Object.keys(state.data);
+             for(let k of keys){ if(state.finalId.includes(k.substring(0,2))) { raw = state.data[k]; break; } }
+             if(raw.length===0) raw = Object.values(state.data).flat();
         }
-
-        let spots = [];
-        if(mode === 'japan') spots = rawSpots.filter(s => s.region === 'japan');
-        else spots = rawSpots.filter(s => s.region === 'world');
-
-        if(!spots || spots.length === 0) { map.setView([36.0, 138.0], 5); return; }
-
+        let spots = state.mode==='japan' ? raw.filter(s=>s.region==='japan') : raw.filter(s=>s.region==='world');
+        
+        if(spots.length===0) { state.map.setView([35,135], 5); return; }
+        
         const bounds = [];
-        spots.forEach(s => {
-            const isSaved = saved.has(s.uid);
-            const cls = isSaved ? 'pin-sav' : 'pin-sys';
-            const icon = L.divIcon({className:'', html:`<img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png" class="leaflet-marker-icon ${cls}" style="margin-left:-12px; margin-top:-41px;">`});
-            
-            const m = L.marker([s.lat, s.lng], {icon:icon}).addTo(map);
-            m.on('click', () => showSpot(s));
-            markers.push(m);
+        spots.forEach(s=>{
+            const isSaved = state.saved.has(s.uid);
+            const icon = L.divIcon({className:'', html:`<img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png" class="leaflet-marker-icon ${isSaved?'pin-sav':'pin-sys'}" style="margin-left:-12px; margin-top:-41px;">`});
+            const m = L.marker([s.lat, s.lng], {icon:icon}).addTo(state.map);
+            m.on('click', ()=>showSpot(s));
             bounds.push([s.lat, s.lng]);
         });
-
-        if(spots.length===1) map.setView([spots[0].lat, spots[0].lng], spots[0].zoom);
-        else map.fitBounds(bounds, {padding:[50,50]});
-
-        showSpot(spots[0]);
+        state.map.fitBounds(bounds, {padding:[50,50]});
     }
 
     function showSpot(s){
-        curSpot = s;
-        const n = lang==='ja' ? (s.name_jp||s.rec) : (s.name_en||s.rec);
-        document.getElementById('spot-name').innerText = n;
-        document.getElementById('spot-desc').innerText = s.desc || "Recommended Spot";
-        
-        const btnInsta = document.getElementById('btn-insta');
-        if(s.tag){
-            btnInsta.href = `https://www.instagram.com/explore/tags/${s.tag}/`;
-            btnInsta.style.opacity = 1; btnInsta.style.pointerEvents = 'auto';
-        } else {
-            btnInsta.style.opacity = 0.5; btnInsta.style.pointerEvents = 'none';
-        }
+        state.curSpot = s;
+        document.getElementById('spot-name').innerText = state.lang==='ja'?s.name_jp:s.name_en;
+        document.getElementById('spot-desc').innerText = s.desc || "Recommended";
+        document.getElementById('btn-insta').href = s.tag ? `https://www.instagram.com/explore/tags/${s.tag}/` : "#";
         updateSaveBtn();
     }
 
     function toggleSave(){
-        if(!curSpot) return;
-        const k = curSpot.uid;
-        if(saved.has(k)) saved.delete(k); else saved.add(k);
-        localStorage.setItem('tid_saved', JSON.stringify([...saved]));
+        if(!state.curSpot) return;
+        if(!state.user && !confirm("You are in Guest Mode. Data may be lost if you clear cache. Log in to save permanently?")) return;
+        
+        const k = state.curSpot.uid;
+        if(state.saved.has(k)) state.saved.delete(k); else state.saved.add(k);
+        localStorage.setItem('tid_saved', JSON.stringify([...state.saved]));
+        saveProfile();
         updateSaveBtn();
         updateMap();
     }
 
     function updateSaveBtn(){
-        if(!curSpot) return;
-        const isSaved = saved.has(curSpot.uid);
+        if(!state.curSpot) return;
+        const saved = state.saved.has(state.curSpot.uid);
         const btn = document.getElementById('btn-save');
-        const icon = document.getElementById('icon-save');
-        const txt = document.getElementById('txt-save');
-        const t = T[lang];
-
-        if(isSaved){
-            btn.classList.add('saved');
-            icon.innerText = '♥';
-            txt.innerText = t.saved;
-        } else {
-            btn.classList.remove('saved');
-            icon.innerText = '♡';
-            txt.innerText = t.save;
-        }
+        if(saved) { btn.classList.add('saved'); btn.innerHTML = '♥ Saved'; }
+        else { btn.classList.remove('saved'); btn.innerHTML = '♡ Save'; }
     }
 
+    // Modal
+    function openLoginModal(){ document.getElementById('login-modal').classList.remove('hidden'); }
+    function closeLoginModal(){ document.getElementById('login-modal').classList.add('hidden'); }
+    function toggleLang() { state.lang = state.lang==='en'?'ja':'en'; updateUIText(); if(state.finalId) updateResultUI(); else renderQ(); }
+    
+    // Copy & Share
     function copyDiscordProfile() {
-        const tData = T[lang].types[finalId] || T[lang].types["fallback"];
+        const tData = T[state.lang].types[state.finalId] || T[state.lang].types["fallback"];
         let recSpot = "Not selected";
-        
-        // Find best recommended spot
-        if(dataCache[finalId] && dataCache[finalId].length > 0) {
-            recSpot = lang==='ja' ? dataCache[finalId][0].name_jp : dataCache[finalId][0].name_en; 
-        }
-
-        const text = `**【${finalId}】 (${tData.t})**\n${tData.d}\n\n📍 Recommended: ${recSpot}\n#TravelID\n${window.location.href}`;
-        
-        navigator.clipboard.writeText(text).then(() => {
-            alert(lang==='ja' ? "プロフをコピーしました！Discordに貼り付けてください。" : "Profile copied! Paste it in Discord.");
-        });
+        if(state.data[state.finalId] && state.data[state.finalId].length > 0) recSpot = state.data[state.finalId][0].name_jp;
+        const text = `**【${state.finalId}】 (${tData.t})**\n**MBTI: ${state.mbti}**\n${tData.d}\n\n📍 Recommended: ${recSpot}\n#TravelID\n${window.location.href}`;
+        navigator.clipboard.writeText(text).then(() => alert("Profile copied!"));
     }
-
     function shareUrl() {
-        const savedArr = Array.from(saved);
-        const baseUrl = window.location.origin + window.location.pathname;
-        const shareUrl = `${baseUrl}?id=${finalId}&saved=${savedArr.join(',')}`;
-        navigator.clipboard.writeText(shareUrl).then(() => {
-            alert(lang==='ja' ? "URLをコピーしました！" : "URL Copied!");
-        });
+        const url = `${window.location.origin}${window.location.pathname}?id=${state.finalId}`;
+        navigator.clipboard.writeText(url).then(() => alert("URL Copied!"));
     }
-
     function shareTwitter() {
-        const tData = T[lang].types[finalId] || T[lang].types["fallback"];
-        const text = `I am "${tData.t}". My Travel ID is 【${finalId}】. #TravelID`;
-        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
-        window.open(url, '_blank');
+        const text = `I am "${state.finalId}" (${state.mbti}). #TravelID`;
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
     }
+    function setMode(m){ state.mode=m; document.getElementById('opt-japan').classList.toggle('active', m==='japan'); document.getElementById('opt-world').classList.toggle('active', m==='world'); updateMap(); }
 
-    init();
 </script>
 </body>
 </html>
