@@ -3,19 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Discover your travel style based on values, not demographics.">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://unpkg.com https://*.basemaps.cartocdn.com; connect-src 'self' https://docs.google.com https://zqghkzukkzmpszdxyqgf.supabase.co;">
-    
     <title>Travel ID - Value Segmentation</title>
     <link rel="icon" href="./images/logo.png">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://unpkg.com">
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
 
@@ -25,50 +19,78 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
     <style>
-        /* Styles */
-        :root { --primary: #111827; --secondary: #6b7280; --accent: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --pink: #ff007f; --discord: #5865F2; --scale-5: #111827; --scale-4: #4b5563; --scale-3: #9ca3af; --scale-2: #d1d5db; --scale-1: #f3f4f6; }
-        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--primary); margin: 0; line-height: 1.6; }
-        .container { background: var(--surface); max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
-        .hidden { display: none !important; }
+        :root {
+            --primary: #111827; --secondary: #6b7280; --accent: #2563eb; 
+            --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; 
+            --pink: #ff007f; --discord: #5865F2;
+            --scale-5: #111827; --scale-4: #4b5563; --scale-3: #9ca3af; --scale-2: #d1d5db; --scale-1: #f3f4f6;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--primary); margin: 0; padding: 0; line-height: 1.6; }
+        .container { background: var(--surface); width: 100%; max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
         
-        /* Auth UI */
-        .auth-bar { padding: 10px 20px; background: #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; border-bottom: 1px solid var(--border); }
-        .auth-status { color: var(--primary); }
-        .auth-btn { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 11px; }
-        #login-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 350px; text-align: center; }
-        .modal-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin: 15px 0; font-size: 16px; }
+        /* Auth Bar */
+        .auth-bar { padding: 12px 20px; background: #f1f5f9; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 50; }
+        .auth-status { font-size: 11px; font-weight: 700; color: var(--secondary); }
+        .auth-btn { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+        /* Login Modal */
+        #login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .modal-input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; }
+
+        /* Header & Lang Switch */
+        .header { padding: 40px 24px 30px; position: relative; }
+        .lang-switch { position: absolute; top: 20px; right: 24px; font-size: 11px; font-weight: 800; color: var(--primary); background: white; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); cursor: pointer; z-index: 40; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        /* Header & Buttons */
-        .header { padding: 60px 24px 40px; }
         .brand-tag { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; display: block; margin-bottom: 10px; }
-        h1 { font-size: 36px; font-weight: 900; margin: 0; line-height: 1.1; letter-spacing: -1.5px; }
-        .btn-primary { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: 700; margin-top: 30px; cursor: pointer; display: flex; justify-content: space-between; font-size: 16px; }
+        h1 { font-size: 36px; font-weight: 900; margin: 0; line-height: 1.1; letter-spacing: -1px; }
+        .hero-sub { font-size: 15px; color: var(--secondary); margin-top: 15px; font-weight: 500; }
+
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 30px; display: flex; justify-content: space-between; align-items: center; transition: opacity 0.2s; }
         .btn-primary:active { transform: scale(0.98); }
 
-        /* Quiz & Result Styles */
-        .opt-btn { width: 100%; padding: 14px; border: 1px solid var(--border); background: white; margin-bottom: 8px; border-radius: 12px; text-align: left; font-weight: 600; cursor: pointer; }
+        /* Quiz UI */
+        #quiz-screen, #mbti-screen { padding: 60px 24px; }
+        .hidden { display: none !important; }
+        .progress-track { height: 6px; background: #f1f5f9; margin-bottom: 20px; border-radius: 3px; overflow: hidden;}
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s ease; }
+        .q-cat { font-size: 10px; font-weight: 800; color: var(--accent); letter-spacing: 1px; display: block; margin-bottom: 8px;}
+        .q-text { font-size: 20px; font-weight: 800; margin-bottom: 30px; min-height: 60px; line-height: 1.4; }
+        
+        .opt-btn { width: 100%; padding: 16px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 12px; background: white; text-align: left; font-weight: 600; cursor: pointer; transition: 0.1s; }
+        .opt-btn:active { background: #f3f4f6; }
         .opt-5 { border-left: 6px solid var(--scale-5); } .opt-4 { border-left: 4px solid var(--scale-4); } .opt-3 { border-left: 2px solid var(--scale-3); } .opt-2 { border-left: 1px solid var(--scale-2); } .opt-1 { border-left: 1px solid var(--scale-1); }
-        
-        /* Result */
-        .id-kanji { font-size: 52px; font-weight: 900; margin: 10px 0; letter-spacing: 4px; }
-        .tribe-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
-        .tribe-btn { padding: 12px; border: 1px solid var(--border); background: white; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; text-decoration: none; color: var(--primary); }
-        .tribe-btn.discord { grid-column: span 2; background: var(--discord); color: white; border: none; }
-        
-        /* Map */
-        #map-container { flex-grow: 1; min-height: 300px; background: #e5e7eb; position: relative; z-index: 1; }
+
+        /* Result UI */
+        #result-screen { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; }
+        .res-header { padding: 30px 24px 20px; border-bottom: 1px solid var(--border); text-align: center; }
+        .id-kanji { font-size: 48px; font-weight: 900; margin: 5px 0; letter-spacing: 4px; color: var(--primary); }
+        .id-title { font-size: 18px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin:0;}
+        .id-mbti { font-size: 12px; font-weight: 800; background: #eef2ff; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 15px; border:1px solid #c7d2fe; }
+        .id-desc { font-size: 13px; color: var(--secondary); text-align: left; margin: 15px 0 25px; line-height: 1.6; }
+        .tribe-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tribe-btn { padding: 12px; border: 1px solid var(--border); background: white; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; color: var(--primary); text-decoration: none;}
+        .tribe-btn.discord { grid-column: span 2; background: var(--discord); color: white; border: none; font-size: 13px; padding: 14px;}
+
+        /* Map & Controls */
+        .controls { padding: 10px 24px; display: flex; gap: 8px; border-bottom: 1px solid var(--border); background: white; }
+        .ctrl-pill { padding: 6px 14px; border-radius: 20px; border: none; background: #f1f5f9; color: var(--secondary); font-weight: 700; font-size: 12px; cursor: pointer; }
+        .ctrl-pill.active { background: var(--primary); color: white; }
+        #map-container { flex-grow: 1; min-height: 300px; background: #e5e7eb; }
         #map { width: 100%; height: 100%; }
-        .spot-card { padding: 20px; background: white; border-top: 1px solid var(--border); z-index: 100; }
-        .actions { display: flex; gap: 10px; margin-top: 10px; }
-        .act-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); text-align: center; font-weight: 700; cursor: pointer; font-size: 13px; text-decoration: none; color: var(--primary); display: flex; justify-content: center; align-items: center; gap: 5px; }
+        
+        /* Spot Card */
+        .spot-card { padding: 24px; background: white; border-top: 1px solid var(--border); z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
+        .spot-n { margin: 0; font-size: 16px; font-weight: 800; }
+        .spot-d { font-size: 12px; color: var(--secondary); margin-bottom: 15px; }
+        .actions { display: flex; gap: 10px; }
+        .act-btn { flex: 1; padding: 14px; border-radius: 12px; border: 1px solid var(--border); text-align: center; font-weight: 700; cursor: pointer; font-size: 13px; color: var(--primary); display: flex; justify-content: center; align-items: center; gap: 6px; text-decoration: none;}
         .act-save.saved { background: var(--pink); color: white; border-color: var(--pink); animation: pop 0.4s ease; }
+        .act-vibe { background: var(--primary); color: white; border-color: var(--primary); }
         @keyframes pop { 50% { transform: scale(1.1); } }
         
-        /* Lang Switch */
-        .lang-switch { position: absolute; top: 20px; right: 20px; font-size: 11px; font-weight: 800; background: white; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); cursor: pointer; z-index: 20; }
-        
-        /* Pins */
+        img.leaflet-marker-icon { transition: all 0.3s; }
         .pin-sys { filter: hue-rotate(140deg) brightness(0.9); }
         .pin-sav { filter: hue-rotate(320deg) saturate(3) brightness(1.2); transform: scale(1.5) translateY(-15px); z-index: 1000 !important; }
     </style>
@@ -83,56 +105,71 @@
 
     <div id="login-modal" class="hidden">
         <div class="modal-content">
-            <h2>Log in / Sign up</h2>
-            <p style="font-size:12px; color:#666; margin-bottom:10px;">Enter email to receive a magic link.</p>
+            <h2 style="margin-top:0;">Log in / Sign up</h2>
+            <p style="font-size:12px; color:#666; margin-bottom:15px;">Enter email to receive a magic link.</p>
             <input type="email" id="email-input" class="modal-input" placeholder="your@email.com">
             <button class="btn-primary" onclick="handleLogin()" style="margin-top:10px;">Send Magic Link</button>
-            <button onclick="closeLoginModal()" style="background:none; border:none; color:#999; margin-top:15px; cursor:pointer;">Cancel</button>
+            <button onclick="closeLoginModal()" style="background:none; border:none; color:#999; margin-top:20px; cursor:pointer; text-decoration:underline;">Cancel</button>
         </div>
     </div>
 
-    <button class="lang-switch" onclick="toggleLang()" id="lang-btn">EN / JP</button>
-
     <section id="start-screen" class="header">
+        <button class="lang-switch" onclick="toggleLang()" id="lang-btn">EN / JP</button>
+        
         <span class="brand-tag">Travel ID</span>
         <h1 id="t-head">Decode Your<br>Travel DNA.</h1>
-        <p style="color:#6b7280; margin-top:10px;">We don't match you by demographics.<br>We match you by values.</p>
+        <p class="hero-sub" id="t-sub">We don't match you by demographics.<br>We match you by values.</p>
+        
         <button class="btn-primary" onclick="startQuiz()">
             <span id="t-start">Analyze My Style</span> <span>→</span>
         </button>
+        
+        <div style="margin-top:40px; border-top:1px solid #f1f5f9; padding-top:20px;">
+            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v34.0 (Action Fixed)</p>
+        </div>
     </section>
 
-    <section id="quiz-screen" class="hidden" style="padding: 60px 24px;">
-        <div style="height:6px; background:#f1f5f9; border-radius:3px; margin-bottom:20px;"><div id="progress" style="height:100%; width:0%; background:#111827; transition:0.3s;"></div></div>
-        <span id="q-cat" style="font-size:10px; font-weight:800; color:#2563eb;">CATEGORY</span>
-        <h2 id="q-text" style="font-size:20px; font-weight:800; margin:10px 0 30px;">Loading...</h2>
+    <section id="quiz-screen" class="hidden">
+        <div class="progress-track"><div id="progress" class="progress-bar"></div></div>
+        <span id="q-cat" class="q-cat">CATEGORY</span>
+        <h2 id="q-text" class="q-text">Loading...</h2>
         <div id="options-box"></div>
+        <div style="margin-top:30px; text-align:center;">
+            <button onclick="prevQ()" style="background:none; border:none; color:#9ca3af; font-size:12px; cursor:pointer; text-decoration:underline;">Back</button>
+        </div>
     </section>
 
-    <section id="mbti-screen" class="hidden" style="padding: 60px 24px;">
-        <h2 style="font-size:24px; font-weight:900;">One last thing...</h2>
+    <section id="mbti-screen" class="hidden">
+        <h2 style="font-size:24px; font-weight:900; margin-bottom:20px;">One last thing...</h2>
         <p style="margin-bottom:20px; font-size:14px; color:#666;">What is your MBTI?</p>
-        <select id="mbti-select" style="width:100%; padding:15px; border-radius:12px; border:2px solid #e2e8f0; font-size:16px; font-weight:700;">
+        
+        <select id="mbti-select" style="width:100%; padding:16px; border-radius:12px; border:2px solid #e2e8f0; font-size:16px; font-weight:700; margin-bottom:20px; background:white;">
             <option value="" disabled selected>Select MBTI</option>
             <option value="INTJ">INTJ</option><option value="INTP">INTP</option><option value="ENTJ">ENTJ</option><option value="ENTP">ENTP</option>
             <option value="INFJ">INFJ</option><option value="INFP">INFP</option><option value="ENFJ">ENFJ</option><option value="ENFP">ENFP</option>
             <option value="ISTJ">ISTJ</option><option value="ISFJ">ISFJ</option><option value="ESTJ">ESTJ</option><option value="ESFJ">ESFJ</option>
             <option value="ISTP">ISTP</option><option value="ISFP">ISFP</option><option value="ESTP">ESTP</option><option value="ESFP">ESFP</option>
+            <option value="UNKNOWN">I don't know</option>
         </select>
-        <button class="btn-primary" onclick="submitMBTI()">See Results →</button>
+        
+        <button class="btn-primary" onclick="submitMBTI()">
+            <span>See Results</span> <span>→</span>
+        </button>
     </section>
 
     <section id="result-screen" class="hidden">
-        <div class="header" style="padding-bottom:20px; text-align:center;">
+        <div class="res-header">
+            <span class="brand-tag">YOUR SEGMENT</span>
+            
             <div id="res-kanji" class="id-kanji">【 】</div>
-            <h2 id="res-id" style="font-size:18px; font-weight:700; color:#2563eb; text-transform:uppercase;">LOADING</h2>
-            <div id="res-mbti" style="font-size:12px; font-weight:800; background:#eef2ff; padding:4px 10px; border-radius:20px; display:inline-block; margin-bottom:10px;">MBTI</div>
+            <h2 id="res-id" class="id-title">LOADING</h2>
+            <div id="res-mbti" class="id-mbti">MBTI</div>
             
             <div id="img-container" style="max-width:200px; margin:0 auto 15px; border-radius:12px; overflow:hidden; display:none;">
                 <img id="type-image" style="width:100%; display:block;" src="" onerror="this.parentElement.style.display='none'">
             </div>
 
-            <p id="res-desc" style="font-size:13px; color:#6b7280; text-align:left; margin-bottom:20px;">Analysis complete.</p>
+            <p id="res-desc" class="id-desc">Analysis complete.</p>
             
             <div class="tribe-actions">
                 <button class="tribe-btn discord" onclick="copyDiscordProfile()">📋 Copy Profile for Discord</button>
@@ -141,20 +178,20 @@
             </div>
         </div>
 
-        <div style="padding:10px 24px; display:flex; gap:10px; border-bottom:1px solid #e2e8f0;">
-            <button id="opt-japan" class="tribe-btn" style="background:#111827; color:white; border:none;" onclick="setMode('japan')">Japan</button>
-            <button id="opt-world" class="tribe-btn" onclick="setMode('world')">Global</button>
-            <button class="tribe-btn" style="margin-left:auto;" onclick="shareUrl()">🔗 URL</button>
+        <div class="controls">
+            <button id="opt-japan" class="ctrl-pill active" onclick="setMode('japan')">Japan</button>
+            <button id="opt-world" class="ctrl-pill" onclick="setMode('world')">Global</button>
+            <button class="ctrl-pill" style="margin-left:auto;" onclick="shareUrl()">🔗 Copy URL</button>
         </div>
 
         <div id="map-container"><div id="map"></div></div>
 
         <div class="spot-card">
-            <h3 id="spot-name" style="margin:0; font-size:16px;">Map Loading...</h3>
-            <p id="spot-desc" style="font-size:12px; color:#666; margin-bottom:15px;">Select a pin.</p>
+            <h3 id="spot-name" class="spot-n">Map Loading...</h3>
+            <p id="spot-desc" class="spot-d">Select a pin.</p>
             <div class="actions">
                 <button id="btn-save" class="act-btn act-save" onclick="toggleSave()">♡ Save</button>
-                <a id="btn-insta" href="#" target="_blank" class="act-btn act-vibe" style="display:flex; justify-content:center; align-items:center; text-decoration:none;">▶ Vibe</a>
+                <a id="btn-insta" href="#" target="_blank" class="act-btn act-vibe">▶ Vibe</a>
             </div>
         </div>
     </section>
@@ -162,7 +199,7 @@
 
 <script>
     // ==========================================
-    // ★ SUPABASE CONFIG - YOUR KEYS ARE HERE! ★
+    // ★ SUPABASE CONFIG ★
     // ==========================================
     const SUPABASE_URL = 'https://zqghkzukkzmpszdxyqgf.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxZ2hrenVra3ptcHN6ZHh5cWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImV4cCI6MjA4NDc1NDY0Nn0.2-ng4M5LLMkTcQp5pqzg8INEQbDef1HQS4zxFWg_DXg';
@@ -170,12 +207,13 @@
 
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrOI46FP-ueet2ZD0xKG0r1_xFng90_PDr1Z-sm6OB5xe3I8m0nx5Q5aNIVxvRVi1QLczBbv4pdnAv/pub?output=csv';
     
-    // Init Supabase
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // !!! CRITICAL FIX: Use specific variable name to avoid collision with library !!!
+    const travelSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Global State
     let state = { lang: 'en', mode: 'japan', finalId: "", mbti: "", map: null, markers: [], data: {}, saved: new Set(), qIdx: 0, scores: {mud:0, clean:0, flow:0, order:0, active:0, safe:0, solo:0, social:0}, user: null };
 
-    // Questions (1-Axis Statements)
+    // Questions
     const Q = [
         { cat: "ENVIRONMENT", ja: "絶景が見られるなら、不衛生な小屋に泊まることも厭わない。", en: "I would stay in a dirty hut if it meant seeing a spectacular view.", pos:{mud:2}, neg:{clean:2} },
         { cat: "CONSUMPTION", ja: "リスクがあっても、得体の知れない現地の屋台料理を食べてみたい。", en: "I am willing to eat mysterious local street food despite the risks.", pos:{mud:2}, neg:{clean:2} },
@@ -194,6 +232,7 @@
 
     const T = {
         en: { 
+            head: "Decode Your\nTravel DNA.", sub: "We don't match you by demographics.\nWe match you by values.", start: "Analyze My Style", save: "Save", saved: "Saved!", vibe: "View Vibe", world: "Global", japan: "Domestic", discord: "Copy Profile for Discord", submit: "Submit Spot",
             types: {
                 "泥攻孤遊": { t: "The Unfiltered Explorer", d: "Raw × Intense × Solo × Spontaneous.\nA nomad who seeks truth over comfort. You find beauty in the chaos that others reject." },
                 "浄安共律": { t: "The Aesthetic Planner", d: "Refined × Gentle × Social × Structured.\nA guardian of beauty. You curate perfect harmony and reject the noise of the world." },
@@ -203,6 +242,7 @@
             }
         },
         ja: {
+            head: "旅のDNAを\n解読する。", sub: "属性ではなく、\n「価値観」で世界を再定義する。", start: "スタイルを分析", save: "保存", saved: "保存完了", vibe: "動画を見る", world: "世界", japan: "日本", discord: "Discord用プロフをコピー", submit: "聖地をタレこむ",
             types: {
                 "泥攻孤遊": { t: "The Unfiltered Explorer", d: "【Raw × Intense × Solo × Spontaneous】\n飾らない探究者。安全な飼育小屋より、傷だらけの荒野を選ぶ。カオスの中にこそ「生」がある。" },
                 "浄安共律": { t: "The Aesthetic Planner", d: "【Refined × Gentle × Social × Structured】\n美学ある計画者。ノイズを徹底して排除し、地上に完璧な楽園（サンクチュアリ）を設計する。" },
@@ -215,26 +255,25 @@
 
     // --- AUTH LOGIC ---
     async function checkUser() {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await travelSupabase.auth.getSession();
         if (session) {
             state.user = session.user;
             updateAuthUI();
             await loadProfile(); 
         }
-        // If not logged in, fallback to localStorage is already handled in init
     }
 
     async function handleLogin() {
         const email = document.getElementById('email-input').value;
         if (!email) return alert("Enter email");
-        const { error } = await supabase.auth.signInWithOtp({ email });
+        const { error } = await travelSupabase.auth.signInWithOtp({ email });
         if (error) alert("Error: " + error.message);
         else alert("Magic Link sent! Check your email to login.");
         closeLoginModal();
     }
 
     async function handleLogout() {
-        await supabase.auth.signOut();
+        await travelSupabase.auth.signOut();
         location.reload();
     }
 
@@ -257,23 +296,23 @@
             final_id: state.finalId,
             mbti: state.mbti
         };
-        await supabase.from('profiles').upsert(updates);
+        await travelSupabase.from('profiles').upsert(updates);
     }
 
     async function loadProfile() {
         if (!state.user) return;
-        const { data, error } = await supabase.from('profiles').select('*').eq('id', state.user.id).single();
+        const { data } = await travelSupabase.from('profiles').select('*').eq('id', state.user.id).single();
         if (data && data.saved_spots) {
             state.saved = new Set(data.saved_spots);
-            // If we wanted to restore their previous result, we could do: state.finalId = data.final_id;
             if (state.map) updateMap();
         }
     }
 
     // --- APP LOGIC ---
+    document.addEventListener('DOMContentLoaded', () => { init(); });
+
     function init(){
         checkUser(); 
-        // LocalStorage fallback
         const localSaved = JSON.parse(localStorage.getItem('tid_saved') || '[]');
         if(!state.user && localSaved.length > 0) state.saved = new Set(localSaved);
 
@@ -285,7 +324,7 @@
                 state.finalId = sharedId;
                 showResultScreen();
             } else {
-                renderQ();
+                updateUIText();
             }
         });
     }
@@ -318,7 +357,7 @@
         const box = document.getElementById('options-box'); box.innerHTML='';
         const opts = [{l:state.lang==='ja'?"強くそう思う":"Strongly Agree", w:2, c:"opt-5"}, {l:state.lang==='ja'?"そう思う":"Agree", w:1, c:"opt-4"}, {l:state.lang==='ja'?"どちらでもない":"Neutral", w:0, c:"opt-3"}, {l:state.lang==='ja'?"そう思わない":"Disagree", w:-1, c:"opt-2"}, {l:state.lang==='ja'?"全くそう思わない":"Strongly Disagree", w:-2, c:"opt-1"}];
         opts.forEach(o=>{
-            const b = document.createElement('button'); b.className = `opt-btn ${o.c}`; b.innerHTML=o.l;
+            const b = document.createElement('div'); b.className = `opt-btn ${o.c}`; b.innerHTML=o.l;
             b.onclick = ()=>{ 
                 if(o.w>0) Object.keys(q.pos).forEach(k=>state.scores[k]+=q.pos[k]*o.w);
                 if(o.w<0) Object.keys(q.neg).forEach(k=>state.scores[k]+=q.neg[k]*Math.abs(o.w));
@@ -327,6 +366,8 @@
             box.appendChild(b);
         });
     }
+
+    function prevQ(){ if(state.qIdx > 0){ state.qIdx--; renderQ(); } else { location.reload(); } }
 
     function submitMBTI(){
         state.mbti = document.getElementById('mbti-select').value;
@@ -349,6 +390,11 @@
 
     function showResultScreen(){
         document.getElementById('result-screen').classList.remove('hidden');
+        updateResultUI();
+        setTimeout(()=>{ if(!state.map) initMap(); else state.map.invalidateSize(); updateMap(); }, 200);
+    }
+
+    function updateResultUI(){
         document.getElementById('res-kanji').innerText = `【 ${state.finalId} 】`;
         document.getElementById('res-mbti').innerText = `MBTI: ${state.mbti}`;
         
@@ -367,13 +413,40 @@
         document.getElementById('res-id').innerText = tData.t;
         document.getElementById('res-desc').innerText = tData.d;
         
-        setTimeout(()=>{
-            if(!state.map) initMap();
-            else state.map.invalidateSize();
-            updateMap();
-        }, 200);
+        const t = T[state.lang];
+        document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
+        document.getElementById('t-sub').innerHTML = t.sub.replace('\n', '<br>');
+        document.getElementById('t-start').innerText = t.start;
+        document.querySelector('.tribe-btn.discord span:last-child').innerText = t.discord;
+        document.querySelector('a[href*="forms"]').innerText = "⚡ " + t.submit;
+        document.getElementById('opt-world').innerText = t.world;
+        document.getElementById('opt-japan').innerText = t.japan;
+        document.getElementById('btn-save').innerHTML = state.saved.has(state.curSpot?.uid) ? '♥ Saved' : '♡ ' + t.save;
+        document.getElementById('btn-insta').innerText = '▶ ' + t.vibe;
+        
+        if(state.map) updateMap();
     }
 
+    function toggleLang(){
+        state.lang = state.lang==='en'?'ja':'en';
+        document.getElementById('lang-btn').innerText = state.lang==='en'?"EN / JP":"JP / EN";
+        if(state.finalId) updateResultUI(); else {
+            const t = T[state.lang];
+            document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
+            document.getElementById('t-sub').innerHTML = t.sub.replace('\n', '<br>');
+            document.getElementById('t-start').innerText = t.start;
+            if(state.qIdx>0) renderQ();
+        }
+    }
+    
+    function updateUIText(){
+        const t = T[state.lang];
+        document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
+        document.getElementById('t-sub').innerHTML = t.sub.replace('\n', '<br>');
+        document.getElementById('t-start').innerText = t.start;
+    }
+
+    // Map
     function initMap(){
         state.map = L.map('map');
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {attribution:'&copy; CARTO', maxZoom:19}).addTo(state.map);
@@ -408,7 +481,9 @@
         state.curSpot = s;
         document.getElementById('spot-name').innerText = state.lang==='ja'?s.name_jp:s.name_en;
         document.getElementById('spot-desc').innerText = s.desc || "Recommended";
-        document.getElementById('btn-insta').href = s.tag ? `https://www.instagram.com/explore/tags/${s.tag}/` : "#";
+        const btn = document.getElementById('btn-insta');
+        if(s.tag){ btn.href=`https://www.instagram.com/explore/tags/${s.tag}/`; btn.style.opacity=1; btn.style.pointerEvents='auto'; }
+        else { btn.style.opacity=0.5; btn.style.pointerEvents='none'; }
         updateSaveBtn();
     }
 
@@ -428,16 +503,15 @@
         if(!state.curSpot) return;
         const saved = state.saved.has(state.curSpot.uid);
         const btn = document.getElementById('btn-save');
+        const t = T[state.lang];
         if(saved) { btn.classList.add('saved'); btn.innerHTML = '♥ Saved'; }
         else { btn.classList.remove('saved'); btn.innerHTML = '♡ Save'; }
     }
 
-    // Modal
+    // Modal & Shares
     function openLoginModal(){ document.getElementById('login-modal').classList.remove('hidden'); }
     function closeLoginModal(){ document.getElementById('login-modal').classList.add('hidden'); }
-    function toggleLang() { state.lang = state.lang==='en'?'ja':'en'; updateUIText(); if(state.finalId) updateResultUI(); else renderQ(); }
     
-    // Copy & Share
     function copyDiscordProfile() {
         const tData = T[state.lang].types[state.finalId] || T[state.lang].types["fallback"];
         let recSpot = "Not selected";
@@ -450,7 +524,8 @@
         navigator.clipboard.writeText(url).then(() => alert("URL Copied!"));
     }
     function shareTwitter() {
-        const text = `I am "${state.finalId}" (${state.mbti}). #TravelID`;
+        const tData = T[state.lang].types[state.finalId] || T[state.lang].types["fallback"];
+        const text = `I am "${tData.t}" (${state.mbti}). My Travel ID is 【${state.finalId}】. #TravelID`;
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
     }
     function setMode(m){ state.mode=m; document.getElementById('opt-japan').classList.toggle('active', m==='japan'); document.getElementById('opt-world').classList.toggle('active', m==='world'); updateMap(); }
