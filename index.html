@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Travel ID - Value Segmentation</title>
     <link rel="icon" href="./images/logo.png">
     
@@ -21,7 +21,7 @@
         :root {
             --primary: #111827; --secondary: #6b7280; --accent: #2563eb; 
             --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; 
-            --pink: #ff007f; --discord: #5865F2;
+            --pink: #ff007f; --orange: #f97316; --discord: #5865F2;
         }
         * { box-sizing: border-box; }
         body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--primary); margin: 0; padding: 0; line-height: 1.6; }
@@ -32,10 +32,12 @@
         .auth-status { font-size: 11px; font-weight: 700; color: var(--secondary); }
         .auth-btn { background: var(--primary); color: white; border: none; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
-        /* Login Modal */
-        #login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; }
+        .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
+        .modal-textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; height: 80px; resize: none; font-family: inherit; }
+        .hidden { display: none !important; }
 
         /* Header */
         .header { padding: 40px 24px 30px; position: relative; }
@@ -49,7 +51,6 @@
 
         /* Quiz UI */
         #quiz-screen, #mbti-screen { padding: 60px 24px; }
-        .hidden { display: none !important; }
         .progress-track { height: 6px; background: #f1f5f9; margin-bottom: 20px; border-radius: 3px; overflow: hidden;}
         .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s ease; }
         .q-cat { font-size: 10px; font-weight: 800; color: var(--accent); letter-spacing: 1px; display: block; margin-bottom: 8px;}
@@ -60,12 +61,18 @@
 
         /* Result UI */
         #result-screen { flex-grow: 1; display: flex; flex-direction: column; min-height: 100vh; }
-        .res-header { padding: 30px 24px 20px; border-bottom: 1px solid var(--border); text-align: center; background: white; }
+        
+        .dna-header { padding: 30px 24px 20px; border-bottom: 1px solid var(--border); text-align: center; background: white; }
         .id-kanji { font-size: 48px; font-weight: 900; margin: 5px 0; letter-spacing: 4px; color: var(--primary); }
         .id-title { font-size: 18px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin:0;}
         .id-mbti { font-size: 12px; font-weight: 800; background: #eef2ff; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 15px; border:1px solid #c7d2fe; }
         .id-desc { font-size: 13px; color: var(--secondary); text-align: left; margin: 15px 0 15px; line-height: 1.6; }
         
+        .mymap-header { padding: 30px 24px; text-align: left; background: white; border-bottom: 1px solid var(--border); }
+        .mymap-title { font-size: 24px; font-weight: 900; margin: 0; letter-spacing: -0.5px; }
+        .mymap-sub { font-size: 12px; color: var(--secondary); margin-top: 5px; }
+        .mymap-hint { font-size: 11px; background: #fff7ed; color: #c2410c; padding: 8px; border-radius: 6px; margin-top: 15px; display: inline-block; font-weight: 700; }
+
         .param-toggle { width: 100%; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--primary); cursor: pointer; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 6px; }
         .param-box { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; display: none; border: 1px solid var(--border); }
         .param-row { margin-bottom: 12px; }
@@ -77,14 +84,13 @@
         .tribe-btn { padding: 12px; border: 1px solid var(--border); background: white; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; color: var(--primary); text-decoration: none;}
         .tribe-btn.discord { grid-column: span 2; background: var(--discord); color: white; border: none; font-size: 13px; padding: 14px;}
 
-        /* MAP MODE SWITCHER (Curator Style) */
+        /* Map Switcher */
         .map-mode-switch { display: flex; padding: 15px 24px 0; gap: 10px; background: white; }
         .mode-btn { flex: 1; padding: 12px 5px; text-align: center; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: #f8fafc; color: var(--secondary); transition: all 0.2s; line-height: 1.2; }
         .mode-btn strong { display: block; font-size: 13px; font-weight: 800; margin-bottom: 2px; }
         .mode-btn span { font-size: 10px; font-weight: 500; opacity: 0.8; }
         .mode-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        /* Controls */
         .controls { padding: 10px 24px; display: flex; gap: 8px; border-bottom: 1px solid var(--border); background: white; }
         .ctrl-pill { padding: 6px 14px; border-radius: 20px; border: none; background: #f1f5f9; color: var(--secondary); font-weight: 700; font-size: 12px; cursor: pointer; }
         .ctrl-pill.active { background: var(--primary); color: white; }
@@ -92,11 +98,10 @@
         #map-container { height: 50vh; width: 100%; background: #e5e7eb; position: relative; z-index: 1;}
         #map { width: 100%; height: 100%; }
         
-        /* Empty State Overlay */
-        .empty-map-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: rgba(255,255,255,0.9); padding: 20px; border-radius: 12px; width: 80%; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: none; }
-        .empty-map-msg h3 { margin: 0 0 10px; font-size: 16px; }
-        .empty-map-msg p { font-size: 12px; color: #666; margin: 0 0 15px; }
-        .empty-map-msg button { padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .empty-map-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: rgba(255,255,255,0.95); padding: 30px; border-radius: 12px; width: 85%; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: none; }
+        .empty-map-msg h3 { margin: 0 0 10px; font-size: 18px; font-weight: 900; }
+        .empty-map-msg p { font-size: 13px; color: #666; margin: 0 0 20px; line-height: 1.6; }
+        .empty-map-msg button { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; }
 
         .spot-card { padding: 24px; background: white; border-top: 1px solid var(--border); z-index: 100; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
         .spot-n { margin: 0; font-size: 16px; font-weight: 800; }
@@ -111,6 +116,7 @@
         img.leaflet-marker-icon { transition: all 0.3s; }
         .pin-sys { filter: hue-rotate(140deg) brightness(0.9); }
         .pin-sav { filter: hue-rotate(320deg) saturate(3) brightness(1.2); transform: scale(1.5) translateY(-15px); z-index: 1000 !important; }
+        .pin-my { filter: hue-rotate(30deg) saturate(5) brightness(1.1); transform: scale(1.3) translateY(-10px); z-index: 2000 !important; }
     </style>
 </head>
 <body>
@@ -121,7 +127,7 @@
         <button id="auth-action-btn" class="auth-btn" onclick="openLoginModal()">Login / Sign Up</button>
     </div>
 
-    <div id="login-modal" class="hidden">
+    <div id="login-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 style="margin-top:0;">Login / Sign Up</h2>
             <p style="font-size:12px; color:#666; margin-bottom:15px;">Enter email and password.</p>
@@ -129,6 +135,17 @@
             <input type="password" id="password-input" class="modal-input" placeholder="Password">
             <button class="btn-primary" onclick="handleLogin()" style="margin-top:10px;">Login / Create Account</button>
             <button onclick="closeLoginModal()" style="background:none; border:none; color:#999; margin-top:20px; cursor:pointer; text-decoration:underline;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="add-spot-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 style="margin-top:0;">📍 Add Memory</h2>
+            <input type="text" id="new-spot-name" class="modal-input" placeholder="Place Name (e.g. Hidden Cafe)">
+            <textarea id="new-spot-memo" class="modal-textarea" placeholder="Why is this place special?"></textarea>
+            <input type="text" id="new-spot-link" class="modal-input" placeholder="Insta/TikTok Link (Optional)">
+            <button class="btn-primary" onclick="saveMyPin()" style="margin-top:10px;">Save to My Map</button>
+            <button onclick="closeAddSpotModal()" style="background:none; border:none; color:#999; margin-top:20px; cursor:pointer; text-decoration:underline;">Cancel</button>
         </div>
     </div>
 
@@ -152,7 +169,7 @@
         </div>
 
         <div style="margin-top:40px; border-top:1px solid #f1f5f9; padding-top:20px;">
-            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v43.0 (The Curator Edition)</p>
+            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v45.0 (Handmade Map)</p>
         </div>
     </section>
 
@@ -195,18 +212,13 @@
     </section>
 
     <section id="result-screen" class="hidden">
-        <div class="res-header">
+        <div id="dna-header" class="dna-header">
             <span class="brand-tag">YOUR SEGMENT</span>
             <div id="res-kanji" class="id-kanji">【 】</div>
             <h2 id="res-id" class="id-title">LOADING</h2>
             <div id="res-mbti" class="id-mbti">MBTI</div>
-            
-            <div id="img-container" style="max-width:200px; margin:0 auto 15px; border-radius:12px; overflow:hidden; display:none;">
-                <img id="type-image" style="width:100%; display:block;" src="" onerror="this.parentElement.style.display='none'">
-            </div>
-
+            <div id="img-container" style="max-width:200px; margin:0 auto 15px; border-radius:12px; overflow:hidden; display:none;"><img id="type-image" style="width:100%; display:block;" src="" onerror="this.parentElement.style.display='none'"></div>
             <p id="res-desc" class="id-desc">Analysis complete.</p>
-            
             <button class="param-toggle" onclick="toggleParams()">🧬 View Travel DNA</button>
             <div id="param-box" class="param-box">
                 <div class="param-row"><div class="param-labels"><span>MUD</span><span>CLEAN</span></div><div class="param-track"><div id="bar-mud" class="param-fill"></div></div></div>
@@ -214,7 +226,6 @@
                 <div class="param-row"><div class="param-labels"><span>SOLO</span><span>SOCIAL</span></div><div class="param-track"><div id="bar-solo" class="param-fill"></div></div></div>
                 <div class="param-row"><div class="param-labels"><span>FLOW</span><span>ORDER</span></div><div class="param-track"><div id="bar-flow" class="param-fill"></div></div></div>
             </div>
-
             <div class="tribe-actions">
                 <button class="tribe-btn discord" onclick="copyDiscordProfile()">📋 Copy Profile for Discord</button>
                 <a href="https://forms.gle/5L7ndRzgPnh45Mor8" target="_blank" class="tribe-btn">⚡ Submit Spot</a>
@@ -222,13 +233,15 @@
             </div>
         </div>
 
+        <div id="mine-header" class="mymap-header hidden">
+            <h1 class="mymap-title">MY TRAVEL ATLAS</h1>
+            <p class="mymap-sub">My lived experience. My world.</p>
+            <span class="mymap-hint">💡 Long-press on map to add a memory</span>
+        </div>
+
         <div class="map-mode-switch">
-            <div id="mode-dna" class="mode-btn active" onclick="setMapSource('dna')">
-                <strong>🔍 DNA Map</strong><span>Discover</span>
-            </div>
-            <div id="mode-mine" class="mode-btn" onclick="setMapSource('mine')">
-                <strong>📍 My Map</strong><span>Curate</span>
-            </div>
+            <div id="mode-dna" class="mode-btn active" onclick="setMapSource('dna')"><strong>🔍 DNA Map</strong><span>Discover</span></div>
+            <div id="mode-mine" class="mode-btn" onclick="setMapSource('mine')"><strong>📍 My Map</strong><span>Curate</span></div>
         </div>
 
         <div class="controls">
@@ -241,8 +254,8 @@
             <div id="map"></div>
             <div id="empty-msg" class="empty-map-msg">
                 <h3>Start Curating</h3>
-                <p>Your map is a blank canvas.<br>Find resonance in the DNA Map.</p>
-                <button onclick="setMapSource('dna')">Go to DNA Map</button>
+                <p>Your map is waiting for your story.<br>Go to DNA Map to find resonance.</p>
+                <button onclick="setMapSource('dna')">Explore DNA Map</button>
             </div>
         </div>
 
@@ -267,341 +280,216 @@
     // ==========================================
 
     const travelSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let state = { lang: 'en', region: 'japan', mapSource: 'dna', finalId: "", mbti: "", map: null, markers: null, data: {}, saved: new Set(), qIdx: 0, scores: {mud:0, clean:0, flow:0, order:0, active:0, safe:0, solo:0, social:0}, user: null, curSpot: null };
+    // state.myPins stores user created pins
+    let state = { lang: 'en', region: 'japan', mapSource: 'dna', finalId: "", mbti: "", map: null, markers: null, data: {}, saved: new Set(), myPins: [], qIdx: 0, scores: {mud:0, clean:0, flow:0, order:0, active:0, safe:0, solo:0, social:0}, user: null, curSpot: null, tempLat:0, tempLng:0 };
 
-    const MBTI_ROLES = {
-        "INTJ": "建築家", "INTP": "論理学者", "ENTJ": "指揮官", "ENTP": "討論者",
-        "INFJ": "提唱者", "INFP": "仲介者", "ENFJ": "主人公", "ENFP": "運動家",
-        "ISTJ": "管理者", "ISFJ": "擁護者", "ESTJ": "幹部", "ESFJ": "領事官",
-        "ISTP": "巨匠", "ISFP": "冒険家", "ESTP": "起業家", "ESFP": "エンターテイナー"
-    };
+    const MBTI_ROLES = {"INTJ":"建築家","INTP":"論理学者","ENTJ":"指揮官","ENTP":"討論者","INFJ":"提唱者","INFP":"仲介者","ENFJ":"主人公","ENFP":"運動家","ISTJ":"管理者","ISFJ":"擁護者","ESTJ":"幹部","ESFJ":"領事官","ISTP":"巨匠","ISFP":"冒険家","ESTP":"起業家","ESFP":"エンターテイナー"};
+    const Q = [{ cat: "ENVIRONMENT", ja: "絶景が見られるなら、不衛生な小屋に泊まることも厭わない。", en: "I would stay in a dirty hut if it meant seeing a spectacular view.", pos:{mud:2}, neg:{clean:2} },{ cat: "CONSUMPTION", ja: "リスクがあっても、得体の知れない現地の屋台料理を食べてみたい。", en: "I am willing to eat mysterious local street food despite the risks.", pos:{mud:2}, neg:{clean:2} },{ cat: "ISOLATION", ja: "文明から切断された不便な場所は、私にとって苦痛ではなく「解放」だ。", en: "Being cut off from civilization feels more like 'freedom' than 'pain'.", pos:{mud:1,solo:1}, neg:{clean:1,social:1} },{ cat: "UNCERTAINTY", ja: "地図を持たずに迷子になることは、ストレスではなく「喜び」だ。", en: "Getting lost without a map is a joy, not a stress.", pos:{flow:2}, neg:{order:2} },{ cat: "CONTROL", ja: "分単位で完璧なスケジュールが決まっていると、安心する。", en: "I feel safe when my schedule is planned down to the minute.", pos:{order:2}, neg:{flow:2} },{ cat: "ADAPTABILITY", ja: "旅のトラブルは「エラー」ではなく「ドラマ」だと思う。", en: "Travel troubles are 'drama' to be enjoyed, not 'errors' to be fixed.", pos:{flow:2}, neg:{order:2} },{ cat: "INTENSITY", ja: "旅の目的は「癒やし」よりも「消耗（全力を出し切ること）」だ。", en: "The goal of travel is exhaustion (giving my all) rather than healing.", pos:{active:2}, neg:{safe:2} },{ cat: "RISK", ja: "治安の悪いスラム街を、安全なバスから見るより降りて歩きたい。", en: "I'd rather walk through a gritty slum than watch it from a safe bus.", pos:{active:2}, neg:{safe:2} },{ cat: "INVESTMENT", ja: "予算を使うなら「極上の安息」より「極限の体験」に使いたい。", en: "I'd invest in an 'extreme experience' rather than 'luxury rest'.", pos:{active:2}, neg:{safe:2} },{ cat: "SOLITUDE", ja: "大自然の中で一人でいる時、寂しさよりも全能感を感じる。", en: "Alone in nature, I feel empowerment rather than loneliness.", pos:{solo:2}, neg:{social:2} },{ cat: "CONNECTION", ja: "言葉が通じなくても、現地の人の中に飛び込んで交流したい。", en: "I want to dive in and interact with locals even if we don't speak the same language.", pos:{social:2}, neg:{solo:2} },{ cat: "PARTNER", ja: "旅のパートナーは、従順な人より「私を振り回すクレイジーな人」がいい。", en: "I prefer a crazy partner who drags me around over an obedient one.", pos:{social:1,flow:1}, neg:{solo:1,order:1} },{ cat: "CORE", ja: "私にとって旅とは「日常の回復」ではなく「価値観の破壊」だ。", en: "To me, travel is about destroying values, not restoring daily life.", pos:{active:2,mud:1}, neg:{safe:2,clean:1} }];
 
-    const Q = [
-        { cat: "ENVIRONMENT", ja: "絶景が見られるなら、不衛生な小屋に泊まることも厭わない。", en: "I would stay in a dirty hut if it meant seeing a spectacular view.", pos:{mud:2}, neg:{clean:2} },
-        { cat: "CONSUMPTION", ja: "リスクがあっても、得体の知れない現地の屋台料理を食べてみたい。", en: "I am willing to eat mysterious local street food despite the risks.", pos:{mud:2}, neg:{clean:2} },
-        { cat: "ISOLATION", ja: "文明から切断された不便な場所は、私にとって苦痛ではなく「解放」だ。", en: "Being cut off from civilization feels more like 'freedom' than 'pain'.", pos:{mud:1,solo:1}, neg:{clean:1,social:1} },
-        { cat: "UNCERTAINTY", ja: "地図を持たずに迷子になることは、ストレスではなく「喜び」だ。", en: "Getting lost without a map is a joy, not a stress.", pos:{flow:2}, neg:{order:2} },
-        { cat: "CONTROL", ja: "分単位で完璧なスケジュールが決まっていると、安心する。", en: "I feel safe when my schedule is planned down to the minute.", pos:{order:2}, neg:{flow:2} },
-        { cat: "ADAPTABILITY", ja: "旅のトラブルは「エラー」ではなく「ドラマ」だと思う。", en: "Travel troubles are 'drama' to be enjoyed, not 'errors' to be fixed.", pos:{flow:2}, neg:{order:2} },
-        { cat: "INTENSITY", ja: "旅の目的は「癒やし」よりも「消耗（全力を出し切ること）」だ。", en: "The goal of travel is exhaustion (giving my all) rather than healing.", pos:{active:2}, neg:{safe:2} },
-        { cat: "RISK", ja: "治安の悪いスラム街を、安全なバスから見るより降りて歩きたい。", en: "I'd rather walk through a gritty slum than watch it from a safe bus.", pos:{active:2}, neg:{safe:2} },
-        { cat: "INVESTMENT", ja: "予算を使うなら「極上の安息」より「極限の体験」に使いたい。", en: "I'd invest in an 'extreme experience' rather than 'luxury rest'.", pos:{active:2}, neg:{safe:2} },
-        { cat: "SOLITUDE", ja: "大自然の中で一人でいる時、寂しさよりも全能感を感じる。", en: "Alone in nature, I feel empowerment rather than loneliness.", pos:{solo:2}, neg:{social:2} },
-        { cat: "CONNECTION", ja: "言葉が通じなくても、現地の人の中に飛び込んで交流したい。", en: "I want to dive in and interact with locals even if we don't speak the same language.", pos:{social:2}, neg:{solo:2} },
-        { cat: "PARTNER", ja: "旅のパートナーは、従順な人より「私を振り回すクレイジーな人」がいい。", en: "I prefer a crazy partner who drags me around over an obedient one.", pos:{social:1,flow:1}, neg:{solo:1,order:1} },
-        { cat: "CORE", ja: "私にとって旅とは「日常の回復」ではなく「価値観の破壊」だ。", en: "To me, travel is about destroying values, not restoring daily life.", pos:{active:2,mud:1}, neg:{safe:2,clean:1} }
-    ];
-
+    // AUTH
     async function checkUser() {
         const { data: { session } } = await travelSupabase.auth.getSession();
-        if (session) { state.user = session.user; updateAuthUI(); await loadProfile(); }
+        if (session) { state.user = session.user; updateAuthUI(); await loadProfile(); await loadMyPins(); }
     }
-    
     async function handleLogin() {
         const email = document.getElementById('email-input').value.trim();
         const password = document.getElementById('password-input').value.trim();
-        if (!email || !password) return alert("Please enter both email and password.");
-        
+        if (!email || !password) return alert("Enter email and password.");
         const { data, error } = await travelSupabase.auth.signInWithPassword({ email, password });
         if (error) {
-            console.log("Login failed, trying signup...", error.message);
-            const { data: upData, error: upError } = await travelSupabase.auth.signUp({ email, password });
+            console.log("Login failed, trying signup...");
+            const { error: upError } = await travelSupabase.auth.signUp({ email, password });
             if (upError) alert("Error: " + upError.message);
-            else { alert("Account created and Logged in!"); closeLoginModal(); checkUser(); }
-        } else {
-            alert("Logged in successfully!"); closeLoginModal(); checkUser();
-        }
+            else { alert("Created and Logged in!"); closeLoginModal(); checkUser(); }
+        } else { alert("Logged in!"); closeLoginModal(); checkUser(); }
     }
-
     async function handleLogout() { await travelSupabase.auth.signOut(); location.reload(); }
+    function updateAuthUI() { if (state.user) { document.getElementById('user-display').innerText = state.user.email; document.getElementById('auth-action-btn').innerText = "Logout"; document.getElementById('auth-action-btn').onclick = handleLogout; } }
     
-    function updateAuthUI() {
-        if (state.user) {
-            document.getElementById('user-display').innerText = state.user.email;
-            const b = document.getElementById('auth-action-btn');
-            b.innerText = "Logout"; b.onclick = handleLogout;
-        }
-    }
-    
-    async function saveProfile() {
-        if (!state.user) return;
-        await travelSupabase.from('profiles').upsert({
-            id: state.user.id, updated_at: new Date(), saved_spots: Array.from(state.saved), final_id: state.finalId, mbti: state.mbti
-        });
-    }
-
+    // DATA LOAD
+    async function saveProfile() { if (!state.user) return; await travelSupabase.from('profiles').upsert({ id: state.user.id, updated_at: new Date(), saved_spots: Array.from(state.saved), final_id: state.finalId, mbti: state.mbti }); }
     async function loadProfile() {
         if (!state.user) return;
         const { data } = await travelSupabase.from('profiles').select('*').eq('id', state.user.id).single();
         if (data) {
             if (data.saved_spots) state.saved = new Set(data.saved_spots);
             if (data.final_id) {
-                state.finalId = data.final_id;
-                state.mbti = data.mbti || "";
-                document.getElementById('btn-start').classList.add('hidden');
-                document.getElementById('logged-in-actions').classList.remove('hidden');
-                document.getElementById('t-sub').innerText = "Welcome back. Ready to explore?";
+                state.finalId = data.final_id; state.mbti = data.mbti || "";
+                document.getElementById('btn-start').classList.add('hidden'); document.getElementById('logged-in-actions').classList.remove('hidden'); document.getElementById('t-sub').innerText = "Welcome back.";
             }
         }
     }
-
-    document.addEventListener('DOMContentLoaded', () => { init(); });
-
-    function init(){
-        checkUser(); 
-        const localSaved = JSON.parse(localStorage.getItem('tid_saved') || '[]');
-        if(!state.user && localSaved.length > 0) state.saved = new Set(localSaved);
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const sharedId = urlParams.get('id');
-
-        fetchData(() => {
-            if(sharedId) { state.finalId = sharedId; showResultScreen(); } 
-            else { updateUIText(); }
-        });
+    async function loadMyPins() {
+        if (!state.user) return;
+        const { data } = await travelSupabase.from('my_pins').select('*').eq('user_id', state.user.id);
+        if(data) state.myPins = data;
     }
+
+    // CUSTOM PINS
+    function openAddSpotModal(lat, lng) {
+        if(!state.user) return alert("Please Login to add memories.");
+        state.tempLat = lat; state.tempLng = lng;
+        document.getElementById('add-spot-modal').classList.remove('hidden');
+    }
+    function closeAddSpotModal() { document.getElementById('add-spot-modal').classList.add('hidden'); }
+    async function saveMyPin() {
+        const name = document.getElementById('new-spot-name').value;
+        const memo = document.getElementById('new-spot-memo').value;
+        const link = document.getElementById('new-spot-link').value;
+        if(!name) return alert("Name is required");
+        
+        const newPin = { user_id: state.user.id, lat: state.tempLat, lng: state.tempLng, name: name, memo: memo, link: link };
+        const { data, error } = await travelSupabase.from('my_pins').insert([newPin]).select();
+        
+        if(error) alert("Error saving pin: " + error.message);
+        else {
+            state.myPins.push(data[0]);
+            closeAddSpotModal();
+            updateMap();
+            alert("Memory added!");
+        }
+    }
+
+    // INIT
+    document.addEventListener('DOMContentLoaded', () => { checkUser(); const ls=JSON.parse(localStorage.getItem('tid_saved')||'[]'); if(!state.user && ls.length>0) state.saved=new Set(ls); const u=new URLSearchParams(window.location.search); const sid=u.get('id'); fetchData(()=>{ if(sid){state.finalId=sid; showResultScreen();} else updateUIText(); }); });
 
     function fetchData(cb) {
         Papa.parse(CSV_URL, { download: true, header: true, skipEmptyLines: true, complete: res => {
             res.data.forEach(r => {
-                if(r.id){
-                    const k = r.id.trim();
-                    if(!state.data[k]) state.data[k] = [];
-                    state.data[k].push({
-                        uid: r.uid || Math.random().toString(), name_jp: r.rec_jp, name_en: r.rec_en, desc: r.desc, tag: r.tag ? r.tag.trim() : "",
-                        lat: parseFloat(r.lat), lng: parseFloat(r.lng), zoom: parseInt(r.zoom)||12, region: r.region?r.region.trim():'japan'
-                    });
-                }
+                if(r.id){ const k=r.id.trim(); if(!state.data[k]) state.data[k]=[]; state.data[k].push({uid:r.uid||Math.random().toString(), name_jp:r.rec_jp, name_en:r.rec_en, desc:r.desc, tag:r.tag?r.tag.trim():"", lat:parseFloat(r.lat), lng:parseFloat(r.lng), zoom:parseInt(r.zoom)||12, region:r.region?r.region.trim():'japan'}); }
             });
             if(cb) cb();
         }});
     }
 
+    // QUIZ LOGIC (Simplified)
     function startQuiz(){ document.getElementById('start-screen').classList.add('hidden'); document.getElementById('quiz-screen').classList.remove('hidden'); renderQ(); }
-    
-    function renderQ(){
-        if(state.qIdx >= Q.length){ document.getElementById('quiz-screen').classList.add('hidden'); document.getElementById('mbti-screen').classList.remove('hidden'); return; }
-        const q = Q[state.qIdx];
-        document.getElementById('q-cat').innerText = q.cat;
-        document.getElementById('q-text').innerText = state.lang==='ja' ? q.ja : q.en;
-        document.getElementById('progress').style.width = `${((state.qIdx)/Q.length)*100}%`;
-        const box = document.getElementById('options-box'); box.innerHTML='';
-        const opts = [{l:state.lang==='ja'?"強くそう思う":"Strongly Agree", w:2, c:"opt-5"}, {l:state.lang==='ja'?"そう思う":"Agree", w:1, c:"opt-4"}, {l:state.lang==='ja'?"どちらでもない":"Neutral", w:0, c:"opt-3"}, {l:state.lang==='ja'?"そう思わない":"Disagree", w:-1, c:"opt-2"}, {l:state.lang==='ja'?"全くそう思わない":"Strongly Disagree", w:-2, c:"opt-1"}];
-        opts.forEach(o=>{
-            const b = document.createElement('div'); b.className = `opt-btn ${o.c}`; b.innerHTML=o.l;
-            b.onclick = ()=>{ 
-                if(o.w>0) Object.keys(q.pos).forEach(k=>state.scores[k]+=q.pos[k]*o.w);
-                if(o.w<0) Object.keys(q.neg).forEach(k=>state.scores[k]+=q.neg[k]*Math.abs(o.w));
-                state.qIdx++; renderQ();
-            };
-            box.appendChild(b);
-        });
-    }
+    function renderQ(){ if(state.qIdx>=Q.length){document.getElementById('quiz-screen').classList.add('hidden');document.getElementById('mbti-screen').classList.remove('hidden');return;} const q=Q[state.qIdx]; document.getElementById('q-cat').innerText=q.cat; document.getElementById('q-text').innerText=state.lang==='ja'?q.ja:q.en; document.getElementById('progress').style.width=`${((state.qIdx)/Q.length)*100}%`; const box=document.getElementById('options-box'); box.innerHTML=''; [{l:state.lang==='ja'?"強くそう思う":"Agree",w:2,c:"opt-5"},{l:state.lang==='ja'?"そう思う":"Somewhat Agree",w:1,c:"opt-4"},{l:state.lang==='ja'?"どちらでもない":"Neutral",w:0,c:"opt-3"},{l:state.lang==='ja'?"そう思わない":"Somewhat Disagree",w:-1,c:"opt-2"},{l:state.lang==='ja'?"全くそう思わない":"Disagree",w:-2,c:"opt-1"}].forEach(o=>{ const b=document.createElement('div'); b.className=`opt-btn ${o.c}`; b.innerText=o.l; b.onclick=()=>{ if(o.w>0)Object.keys(q.pos).forEach(k=>state.scores[k]+=q.pos[k]*o.w); if(o.w<0)Object.keys(q.neg).forEach(k=>state.scores[k]+=q.neg[k]*Math.abs(o.w)); state.qIdx++; renderQ(); }; box.appendChild(b); }); }
+    function prevQ(){ if(state.qIdx>0){state.qIdx--;renderQ();}else location.reload(); }
+    function submitMBTI(){ state.mbti=document.getElementById('mbti-select').value; if(!state.mbti)return alert("Select MBTI"); if(state.mbti.includes('E'))state.scores.social+=2;if(state.mbti.includes('I'))state.scores.solo+=2;if(state.mbti.includes('J'))state.scores.order+=2;if(state.mbti.includes('P'))state.scores.flow+=2; state.finalId=(state.scores.mud>=state.scores.clean?"泥":"浄")+(state.scores.active>=state.scores.safe?"攻":"安")+(state.scores.social>=state.scores.solo?"共":"孤")+(state.scores.flow>=state.scores.order?"遊":"律"); document.getElementById('mbti-screen').classList.add('hidden'); showResultScreen(); saveProfile(); }
 
-    function prevQ(){ if(state.qIdx > 0){ state.qIdx--; renderQ(); } else { location.reload(); } }
-
-    function submitMBTI(){
-        const sel = document.getElementById('mbti-select');
-        const v = sel.value;
-        if(!v) return alert("Select MBTI");
-        
-        state.mbti = v;
-        if(v.includes('E')) state.scores.social += 2; if(v.includes('I')) state.scores.solo += 2;
-        if(v.includes('J')) state.scores.order += 2; if(v.includes('P')) state.scores.flow += 2;
-        
-        state.finalId = (state.scores.mud>=state.scores.clean?"泥":"浄") + (state.scores.active>=state.scores.safe?"攻":"安") + (state.scores.social>=state.scores.solo?"共":"孤") + (state.scores.flow>=state.scores.order?"遊":"律");
-        document.getElementById('mbti-screen').classList.add('hidden');
-        showResultScreen();
-        saveProfile();
-    }
-
-    function showResultScreen(openMyMap = false){
-        document.getElementById('start-screen').classList.add('hidden'); 
-        document.getElementById('result-screen').classList.remove('hidden');
-        updateResultUI();
-        
-        if(openMyMap) setMapSource('mine'); 
-
-        const mapDiv = document.getElementById('map-container');
-        const resizeObserver = new ResizeObserver(() => { if(state.map) state.map.invalidateSize(); });
-        resizeObserver.observe(mapDiv);
-        setTimeout(()=>{ if(!state.map) initMap(); else state.map.invalidateSize(); updateMap(); }, 300);
-    }
-
-    function toggleParams() {
-        const box = document.getElementById('param-box');
-        box.style.display = box.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function getDynamicDesc(id) {
-        if(state.lang !== 'ja') return "Your value map is unique. Explore the map to find your tribe.";
-        const parts = [];
-        if(id.includes("泥")) parts.push("飾らないリアルを求め、"); else parts.push("洗練された美を愛し、");
-        if(id.includes("攻")) parts.push("リスクを恐れず突き進む。"); else parts.push("心安らぐ時間を大切にする。");
-        if(id.includes("共")) parts.push("人との繋がりを糧にし、"); else parts.push("孤独の中に自由を見出す。");
-        if(id.includes("遊")) parts.push("予定調和を壊す旅人。"); else parts.push("緻密な計画が旅を彩る。");
-        return parts.join("");
-    }
-
-    function updateResultUI(){
-        document.getElementById('res-kanji').innerText = `【 ${state.finalId} 】`;
-        let mbtiText = `MBTI: ${state.mbti}`;
-        if(MBTI_ROLES[state.mbti] && state.lang === 'ja') mbtiText += `（${MBTI_ROLES[state.mbti]}）`;
-        document.getElementById('res-mbti').innerText = mbtiText;
-        
-        const img = document.getElementById('type-image');
-        img.src = `./images/${state.finalId}.png`;
-        img.onload = ()=>document.getElementById('img-container').style.display='block';
-
-        let title = "THE TRAVELER";
-        if(state.finalId === "泥攻孤遊") title = "THE UNFILTERED EXPLORER";
-        else if(state.finalId === "浄安共律") title = "THE AESTHETIC PLANNER";
-        else if(state.finalId === "泥安共遊") title = "THE IMMERSION SEEKER";
-        else if(state.finalId === "浄攻孤律") title = "THE NOBLE SNIPER";
-        else title = "THE UNIQUE VOYAGER";
-
-        document.getElementById('res-id').innerText = title;
-        document.getElementById('res-desc').innerText = getDynamicDesc(state.finalId);
-        
-        const calcPct = (a, b) => { const total = (a + b) || 1; return Math.round((a / total) * 100) + "%"; };
-        document.getElementById('bar-mud').style.width = calcPct(state.scores.mud, state.scores.clean);
-        document.getElementById('bar-active').style.width = calcPct(state.scores.active, state.scores.safe);
-        document.getElementById('bar-solo').style.width = calcPct(state.scores.solo, state.scores.social);
-        document.getElementById('bar-flow').style.width = calcPct(state.scores.flow, state.scores.order);
-
-        const t = T[state.lang];
-        document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
-        document.getElementById('t-sub').innerHTML = t.sub.replace('\n', '<br>');
-        document.getElementById('t-start').innerText = t.start;
-        const discordBtn = document.querySelector('.tribe-btn.discord');
-        if(discordBtn) discordBtn.innerText = "📋 " + t.discord;
-        const formBtn = document.querySelector('a[href*="forms"]');
-        if(formBtn) formBtn.innerText = "⚡ " + t.submit;
-        document.getElementById('opt-world').innerText = t.world;
-        document.getElementById('opt-japan').innerText = t.japan;
-        
-        updateSaveBtn();
-        if(state.map) updateMap();
-    }
-
-    const T = {
-        en: { head: "Decode Your\nTravel DNA.", sub: "We don't match you by demographics.\nWe match you by values.", start: "Analyze My Style", save: "Save", saved: "Saved!", vibe: "View Vibe", world: "Global", japan: "Domestic", discord: "Copy Profile for Discord", submit: "Submit Spot" },
-        ja: { head: "旅のDNAを\n解読する。", sub: "属性ではなく、\n「価値観」で世界を再定義する。", start: "スタイルを分析", save: "保存", saved: "保存完了", vibe: "動画を見る", world: "世界", japan: "日本", discord: "Discord用プロフをコピー", submit: "聖地をタレこむ" }
-    };
-
-    function toggleLang(){
-        state.lang = state.lang==='en'?'ja':'en';
-        document.getElementById('lang-btn').innerText = state.lang==='en'?"EN / JP":"JP / EN";
-        if(state.finalId) updateResultUI(); else { updateUIText(); if(state.qIdx>0) renderQ(); }
-    }
-    function updateUIText(){
-        const t = T[state.lang];
-        document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
-        document.getElementById('t-sub').innerHTML = t.sub.replace('\n', '<br>');
-        document.getElementById('t-start').innerText = t.start;
-    }
+    function showResultScreen(openMyMap=false){ document.getElementById('start-screen').classList.add('hidden'); document.getElementById('result-screen').classList.remove('hidden'); updateResultUI(); if(openMyMap) setMapSource('mine'); const d=document.getElementById('map-container'); new ResizeObserver(()=>{if(state.map)state.map.invalidateSize()}).observe(d); setTimeout(()=>{if(!state.map)initMap();else state.map.invalidateSize();updateMap();},300); }
+    function toggleParams(){ const b=document.getElementById('param-box'); b.style.display=b.style.display==='block'?'none':'block'; }
+    function getDynamicDesc(id){ if(state.lang!=='ja')return "Your unique travel style."; const p=[]; p.push(id.includes("泥")?"飾らないリアルを求め、":"洗練された美を愛し、"); p.push(id.includes("攻")?"リスクを恐れず突き進む。":"心安らぐ時間を大切にする。"); p.push(id.includes("共")?"人との繋がりを糧にし、":"孤独の中に自由を見出す。"); p.push(id.includes("遊")?"予定調和を壊す旅人。":"緻密な計画が旅を彩る。"); return p.join(""); }
+    function updateResultUI(){ document.getElementById('res-kanji').innerText=`【 ${state.finalId} 】`; document.getElementById('res-mbti').innerText=`MBTI: ${state.mbti}`+(state.lang==='ja'&&MBTI_ROLES[state.mbti]?`（${MBTI_ROLES[state.mbti]}）`:""); document.getElementById('type-image').src=`./images/${state.finalId}.png`; document.getElementById('type-image').onload=()=>document.getElementById('img-container').style.display='block'; document.getElementById('res-id').innerText=state.finalId==="泥攻孤遊"?"THE UNFILTERED EXPLORER":state.finalId==="浄安共律"?"THE AESTHETIC PLANNER":state.finalId==="泥安共遊"?"THE IMMERSION SEEKER":state.finalId==="浄攻孤律"?"THE NOBLE SNIPER":"THE UNIQUE VOYAGER"; document.getElementById('res-desc').innerText=getDynamicDesc(state.finalId); 
+    const cp=(a,b)=>Math.round((a/((a+b)||1))*100)+"%"; document.getElementById('bar-mud').style.width=cp(state.scores.mud,state.scores.clean); document.getElementById('bar-active').style.width=cp(state.scores.active,state.scores.safe); document.getElementById('bar-solo').style.width=cp(state.scores.solo,state.scores.social); document.getElementById('bar-flow').style.width=cp(state.scores.flow,state.scores.order); 
+    const t=T[state.lang]; document.getElementById('t-head').innerHTML=t.head.replace('\n','<br>'); document.getElementById('t-sub').innerHTML=t.sub.replace('\n','<br>'); document.getElementById('t-start').innerText=t.start; const dBtn=document.querySelector('.tribe-btn.discord'); if(dBtn)dBtn.innerText="📋 "+t.discord; const fBtn=document.querySelector('a[href*="forms"]'); if(fBtn)fBtn.innerText="⚡ "+t.submit; document.getElementById('opt-world').innerText=t.world; document.getElementById('opt-japan').innerText=t.japan; updateSaveBtn(); if(state.map)updateMap(); }
+    const T={en:{head:"Decode Your\nTravel DNA.",sub:"We don't match you by demographics.\nWe match you by values.",start:"Analyze My Style",save:"Save",saved:"Saved!",vibe:"View Vibe",world:"Global",japan:"Domestic",discord:"Copy Profile for Discord",submit:"Submit Spot"},ja:{head:"旅のDNAを\n解読する。",sub:"属性ではなく、\n「価値観」で世界を再定義する。",start:"スタイルを分析",save:"保存",saved:"保存完了",vibe:"動画を見る",world:"世界",japan:"日本",discord:"Discord用プロフをコピー",submit:"聖地をタレこむ"}};
+    function toggleLang(){state.lang=state.lang==='en'?'ja':'en';document.getElementById('lang-btn').innerText=state.lang==='en'?"EN / JP":"JP / EN";if(state.finalId)updateResultUI();else{updateUIText();if(state.qIdx>0)renderQ();}}
+    function updateUIText(){const t=T[state.lang];document.getElementById('t-head').innerHTML=t.head.replace('\n','<br>');document.getElementById('t-sub').innerHTML=t.sub.replace('\n','<br>');document.getElementById('t-start').innerText=t.start;}
 
     function initMap(){
         state.map = L.map('map');
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap', maxZoom: 18 }).addTo(state.map);
-        state.markers = L.markerClusterGroup({ maxClusterRadius: 50, spiderfyOnMaxZoom: true });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap',maxZoom:18}).addTo(state.map);
+        state.markers = L.markerClusterGroup({maxClusterRadius:50,spiderfyOnMaxZoom:true});
         state.map.addLayer(state.markers);
+        
+        // ★ LONG PRESS TO ADD PIN ★
+        state.map.on('contextmenu', function(e) {
+            if(state.mapSource === 'mine') {
+                openAddSpotModal(e.latlng.lat, e.latlng.lng);
+            }
+        });
     }
 
-    function setMapSource(source) {
-        state.mapSource = source;
-        document.getElementById('mode-dna').classList.toggle('active', source === 'dna');
-        document.getElementById('mode-mine').classList.toggle('active', source === 'mine');
-        updateMap();
-    }
-    function setRegion(r){ state.region=r; document.getElementById('opt-japan').classList.toggle('active', r==='japan'); document.getElementById('opt-world').classList.toggle('active', r==='world'); updateMap(); }
+    function setMapSource(s){ state.mapSource=s; document.getElementById('mode-dna').classList.toggle('active',s==='dna'); document.getElementById('mode-mine').classList.toggle('active',s==='mine'); 
+        if(s==='mine'){document.getElementById('dna-header').classList.add('hidden');document.getElementById('mine-header').classList.remove('hidden');}else{document.getElementById('dna-header').classList.remove('hidden');document.getElementById('mine-header').classList.add('hidden');} updateMap(); }
+    function setRegion(r){ state.region=r; document.getElementById('opt-japan').classList.toggle('active',r==='japan'); document.getElementById('opt-world').classList.toggle('active',r==='world'); updateMap(); }
 
     function updateMap(){
-        if(!state.map) return;
+        if(!state.map)return;
         state.markers.clearLayers();
+        let sourceList=[];
         
-        let sourceList = [];
-        if(state.mapSource === 'dna') {
-            sourceList = state.data[state.finalId] || [];
-            if(sourceList.length === 0) sourceList = Object.values(state.data).flat(); 
-            document.getElementById('empty-msg').style.display = 'none';
+        if(state.mapSource==='dna'){
+            sourceList=state.data[state.finalId]||[]; 
+            if(sourceList.length===0)sourceList=Object.values(state.data).flat();
+            document.getElementById('empty-msg').style.display='none';
         } else {
-            // MINE MODE
-            const allSpots = Object.values(state.data).flat();
-            sourceList = allSpots.filter(s => state.saved.has(s.uid));
+            // My Map Mode: Merge Saved Official Spots + Custom User Pins
+            const allOfficial=Object.values(state.data).flat();
+            const savedOfficial=allOfficial.filter(s=>state.saved.has(s.uid));
             
-            // Empty State
-            if(sourceList.length === 0) {
-                document.getElementById('empty-msg').style.display = 'block';
-                state.map.setView([35.6895, 139.6917], 5);
-                return;
-            } else {
-                document.getElementById('empty-msg').style.display = 'none';
-            }
+            // Convert Custom Pins to match Spot format
+            const myCustomPins = state.myPins.map(p => ({
+                uid: 'my-' + p.id,
+                name_jp: p.name,
+                name_en: p.name,
+                desc: p.memo,
+                lat: p.lat,
+                lng: p.lng,
+                region: 'world', // Show everywhere
+                tag: p.link, // Use tag field for link
+                isCustom: true
+            }));
+            
+            sourceList = [...savedOfficial, ...myCustomPins];
+            
+            if(sourceList.length===0){document.getElementById('empty-msg').style.display='block';state.map.setView([35.6895,139.6917],5);return;}
+            else document.getElementById('empty-msg').style.display='none';
         }
 
-        let spots = state.region==='japan' ? sourceList.filter(s=>s.region==='japan') : sourceList.filter(s=>s.region==='world');
-        if(spots.length===0 && state.mapSource === 'dna') { state.map.setView([35.6895, 139.6917], 5); return; }
+        let spots=state.region==='japan'?sourceList.filter(s=>s.region==='japan'||s.isCustom):sourceList.filter(s=>s.region==='world'||s.isCustom);
+        if(spots.length===0 && state.mapSource==='dna'){state.map.setView([35.6895,139.6917],5);return;}
         
-        const bounds = [];
+        const bounds=[];
         spots.forEach(s=>{
-            const isSaved = state.saved.has(s.uid);
-            const icon = L.divIcon({className:'', html:`<img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png" class="leaflet-marker-icon ${isSaved?'pin-sav':'pin-sys'}" style="margin-left:-12px; margin-top:-41px;">`});
-            const m = L.marker([s.lat, s.lng], {icon:icon});
-            m.on('click', ()=>showSpot(s));
+            const isSaved=state.saved.has(s.uid);
+            let iconClass = s.isCustom ? 'pin-my' : (isSaved ? 'pin-sav' : 'pin-sys');
+            // If in mine mode, official spots are saved, so ensure they look saved
+            if(state.mapSource === 'mine' && !s.isCustom) iconClass = 'pin-sav';
+
+            const icon=L.divIcon({className:'',html:`<img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png" class="leaflet-marker-icon ${iconClass}" style="margin-left:-12px; margin-top:-41px;">`});
+            const m=L.marker([s.lat,s.lng],{icon:icon});
+            m.on('click',()=>showSpot(s));
             state.markers.addLayer(m);
-            bounds.push([s.lat, s.lng]);
+            bounds.push([s.lat,s.lng]);
         });
-        
-        if(bounds.length > 0) state.map.fitBounds(bounds, {padding:[50,50]});
-        if(spots.length > 0) showSpot(spots[0]);
+        if(bounds.length>0)state.map.fitBounds(bounds,{padding:[50,50]});
+        if(spots.length>0)showSpot(spots[0]);
     }
 
     function showSpot(s){
-        state.curSpot = s;
-        document.getElementById('spot-name').innerText = state.lang==='ja'?s.name_jp:s.name_en;
-        document.getElementById('spot-desc').innerText = s.desc || "Recommended";
-        const btn = document.getElementById('btn-insta');
-        if(s.tag){ btn.href=`https://www.instagram.com/explore/tags/${s.tag}/`; btn.classList.remove('disabled'); } 
-        else { btn.href="javascript:void(0)"; btn.classList.add('disabled'); }
-        updateSaveBtn();
+        state.curSpot=s;
+        document.getElementById('spot-name').innerText=state.lang==='ja'?s.name_jp:s.name_en;
+        document.getElementById('spot-desc').innerText=s.desc||"Recommended";
+        const btn=document.getElementById('btn-insta');
+        
+        if(s.isCustom) {
+             // Custom Pin Logic
+             if(s.tag && (s.tag.includes('http') || s.tag.includes('instagram'))) {
+                 btn.href = s.tag;
+                 btn.classList.remove('disabled');
+                 btn.innerText = "▶ Open Link";
+             } else {
+                 btn.href = "javascript:void(0)";
+                 btn.classList.add('disabled');
+                 btn.innerText = "No Link";
+             }
+             document.getElementById('btn-save').style.display = 'none'; // Can't "save" what is already yours
+        } else {
+            // Official Spot Logic
+            if(s.tag){ btn.href=`https://www.instagram.com/explore/tags/${s.tag}/`; btn.classList.remove('disabled'); btn.innerText = "▶ Vibe"; } 
+            else { btn.href="javascript:void(0)"; btn.classList.add('disabled'); }
+            document.getElementById('btn-save').style.display = 'block';
+            updateSaveBtn();
+        }
     }
 
     function toggleSave(){
-        if(!state.curSpot) return;
-        if(!state.user && !confirm("Guest Mode: Data may be lost. Login to save?")) return;
-        const k = state.curSpot.uid;
-        if(state.saved.has(k)) state.saved.delete(k); else state.saved.add(k);
-        localStorage.setItem('tid_saved', JSON.stringify([...state.saved]));
-        saveProfile();
-        updateSaveBtn();
-        updateMap(); 
+        if(!state.curSpot || state.curSpot.isCustom) return;
+        if(!state.user && !confirm("Login to save?")) return;
+        const k=state.curSpot.uid;
+        if(state.saved.has(k))state.saved.delete(k);else state.saved.add(k);
+        localStorage.setItem('tid_saved',JSON.stringify([...state.saved]));
+        saveProfile(); updateSaveBtn(); updateMap();
     }
-
-    function updateSaveBtn(){
-        if(!state.curSpot) return;
-        const saved = state.saved.has(state.curSpot.uid);
-        const btn = document.getElementById('btn-save');
-        const t = T[state.lang];
-        if(saved) { btn.classList.add('saved'); btn.innerHTML = '♥ Saved'; }
-        else { btn.classList.remove('saved'); btn.innerHTML = '♡ Save'; }
-    }
-
-    function openLoginModal(){ document.getElementById('login-modal').classList.remove('hidden'); }
-    function closeLoginModal(){ document.getElementById('login-modal').classList.add('hidden'); }
-    function copyDiscordProfile() {
-        let recSpot = state.curSpot ? (state.lang==='ja'?state.curSpot.name_jp:state.curSpot.name_en) : "Anywhere";
-        const text = `**【${state.finalId}】**\n**MBTI: ${state.mbti}**\n${document.getElementById('res-desc').innerText}\n\n📍 Recommended: ${recSpot}\n#TravelID\n${window.location.href}`;
-        navigator.clipboard.writeText(text).then(() => alert("Profile copied!"));
-    }
-    function shareUrl() {
-        const url = `${window.location.origin}${window.location.pathname}?id=${state.finalId}`;
-        navigator.clipboard.writeText(url).then(() => alert("URL Copied!"));
-    }
-    function shareTwitter() {
-        const text = `I am "${state.finalId}" (${state.mbti}). #TravelID`;
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
-    }
+    function updateSaveBtn(){ if(!state.curSpot)return; const saved=state.saved.has(state.curSpot.uid); const btn=document.getElementById('btn-save'); if(saved){btn.classList.add('saved');btn.innerHTML='♥ Saved';}else{btn.classList.remove('saved');btn.innerHTML='♡ Save';} }
+    function openLoginModal(){document.getElementById('login-modal').classList.remove('hidden');}
+    function closeLoginModal(){document.getElementById('login-modal').classList.add('hidden');}
+    function copyDiscordProfile(){const s=state.curSpot?(state.lang==='ja'?state.curSpot.name_jp:state.curSpot.name_en):"Anywhere"; navigator.clipboard.writeText(`**【${state.finalId}】**\n**MBTI: ${state.mbti}**\n${document.getElementById('res-desc').innerText}\n\n📍 Recommended: ${s}\n#TravelID\n${window.location.href}`).then(()=>alert("Copied!"));}
+    function shareUrl(){navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?id=${state.finalId}`).then(()=>alert("Copied!"));}
+    function shareTwitter(){window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I am "${state.finalId}" (${state.mbti}). #TravelID`)}&url=${encodeURIComponent(window.location.href)}`,'_blank');}
 </script>
 </body>
 </html>
