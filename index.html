@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Discover your travel style based on values, not demographics.">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' * data: blob: filesystem:; script-src 'self' 'unsafe-inline' *; style-src 'self' 'unsafe-inline' *; img-src 'self' data: *;">
+    
     <title>Travel ID - Value Segmentation</title>
     <link rel="icon" href="./images/logo.png">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
 
@@ -64,7 +68,16 @@
         .id-kanji { font-size: 48px; font-weight: 900; margin: 5px 0; letter-spacing: 4px; color: var(--primary); }
         .id-title { font-size: 18px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin:0;}
         .id-mbti { font-size: 12px; font-weight: 800; background: #eef2ff; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 15px; border:1px solid #c7d2fe; }
-        .id-desc { font-size: 13px; color: var(--secondary); text-align: left; margin: 15px 0 25px; line-height: 1.6; }
+        .id-desc { font-size: 13px; color: var(--secondary); text-align: left; margin: 15px 0 15px; line-height: 1.6; }
+        
+        /* Parameter Toggle */
+        .param-toggle { font-size: 12px; font-weight: 700; color: var(--accent); cursor: pointer; background: none; border: none; text-decoration: underline; margin-bottom: 20px; display: block; width: 100%; }
+        .param-box { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; display: none; border: 1px solid var(--border); }
+        .param-row { margin-bottom: 10px; }
+        .param-label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; margin-bottom: 4px; color: var(--secondary); text-transform: uppercase; }
+        .param-track { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; position: relative; }
+        .param-fill { height: 100%; background: var(--primary); border-radius: 3px; position: absolute; top:0; }
+
         .tribe-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .tribe-btn { padding: 12px; border: 1px solid var(--border); background: white; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px; color: var(--primary); text-decoration: none;}
         .tribe-btn.discord { grid-column: span 2; background: var(--discord); color: white; border: none; font-size: 13px; padding: 14px;}
@@ -88,7 +101,6 @@
         .act-vibe.disabled { opacity: 0.5; pointer-events: none; background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; }
         
         @keyframes pop { 50% { transform: scale(1.1); } }
-        
         img.leaflet-marker-icon { transition: all 0.3s; }
         .pin-sys { filter: hue-rotate(140deg) brightness(0.9); }
         .pin-sav { filter: hue-rotate(320deg) saturate(3) brightness(1.2); transform: scale(1.5) translateY(-15px); z-index: 1000 !important; }
@@ -121,7 +133,7 @@
             <span id="t-start">Analyze My Style</span> <span>→</span>
         </button>
         <div style="margin-top:40px; border-top:1px solid #f1f5f9; padding-top:20px;">
-            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v36.0 (Map & Text Fixed)</p>
+            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v37.0 (Robust Map & Data Viz)</p>
         </div>
     </section>
 
@@ -176,6 +188,26 @@
 
             <p id="res-desc" class="id-desc">Analysis complete.</p>
             
+            <button class="param-toggle" onclick="toggleParams()">📊 View DNA Details</button>
+            <div id="param-box" class="param-box">
+                <div class="param-row">
+                    <div class="param-label"><span>MUD (Raw)</span><span>CLEAN (Refined)</span></div>
+                    <div class="param-track"><div id="bar-mud" class="param-fill"></div></div>
+                </div>
+                <div class="param-row">
+                    <div class="param-label"><span>ACTIVE (Intense)</span><span>SAFE (Gentle)</span></div>
+                    <div class="param-track"><div id="bar-active" class="param-fill"></div></div>
+                </div>
+                <div class="param-row">
+                    <div class="param-label"><span>SOLO (Freedom)</span><span>SOCIAL (Connect)</span></div>
+                    <div class="param-track"><div id="bar-solo" class="param-fill"></div></div>
+                </div>
+                <div class="param-row">
+                    <div class="param-label"><span>FLOW (Chaos)</span><span>ORDER (Plan)</span></div>
+                    <div class="param-track"><div id="bar-flow" class="param-fill"></div></div>
+                </div>
+            </div>
+
             <div class="tribe-actions">
                 <button class="tribe-btn discord" onclick="copyDiscordProfile()">📋 Copy Profile for Discord</button>
                 <a href="https://forms.gle/5L7ndRzgPnh45Mor8" target="_blank" class="tribe-btn">⚡ Submit Spot</a>
@@ -206,15 +238,16 @@
     // ==========================================
     // ★ SUPABASE CONFIG ★
     // ==========================================
-    const SUPABASE_URL = 'https://zqghkzukkzmpszdxyqgf.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxZ2hrenVra3ptcHN6ZHh5cWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImV4cCI6MjA4NDc1NDY0Nn0.2-ng4M5LLMkTcQp5pqzg8INEQbDef1HQS4zxFWg_DXg';
+    // Added .trim() to ensure no accidental spaces
+    const SUPABASE_URL = 'https://zqghkzukkzmpszdxyqgf.supabase.co'.trim();
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxZ2hrenVra3ptcHN6ZHh5cWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImV4cCI6MjA4NDc1NDY0Nn0.2-ng4M5LLMkTcQp5pqzg8INEQbDef1HQS4zxFWg_DXg'.trim();
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrOI46FP-ueet2ZD0xKG0r1_xFng90_PDr1Z-sm6OB5xe3I8m0nx5Q5aNIVxvRVi1QLczBbv4pdnAv/pub?output=csv';
     // ==========================================
 
     const travelSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let state = { lang: 'en', mode: 'japan', finalId: "", mbti: "", map: null, markers: null, data: {}, saved: new Set(), qIdx: 0, scores: {mud:0, clean:0, flow:0, order:0, active:0, safe:0, solo:0, social:0}, user: null, curSpot: null };
 
-    // MBTI Roles (Dictionary)
+    // MBTI Roles
     const MBTI_ROLES = {
         "INTJ": "建築家", "INTP": "論理学者", "ENTJ": "指揮官", "ENTP": "討論者",
         "INFJ": "提唱者", "INFP": "仲介者", "ENFJ": "主人公", "ENFP": "運動家",
@@ -248,7 +281,7 @@
         }
     }
     async function handleLogin() {
-        const email = document.getElementById('email-input').value;
+        const email = document.getElementById('email-input').value.trim();
         if (!email) return alert("Enter email");
         const { error } = await travelSupabase.auth.signInWithOtp({ email });
         if (error) alert("Error: " + error.message);
@@ -336,7 +369,7 @@
         const v = sel.value;
         if(!v) return alert("Select MBTI");
         
-        state.mbti = v; // Store code (e.g. INTJ)
+        state.mbti = v;
         
         if(v.includes('E')) state.scores.social += 2; if(v.includes('I')) state.scores.solo += 2;
         if(v.includes('J')) state.scores.order += 2; if(v.includes('P')) state.scores.flow += 2;
@@ -351,49 +384,43 @@
     function showResultScreen(){
         document.getElementById('result-screen').classList.remove('hidden');
         updateResultUI();
-        // ★ MAP FIX: Wait for transition & Force show all if empty
-        setTimeout(()=>{ if(!state.map) initMap(); else state.map.invalidateSize(); updateMap(); }, 500);
+        
+        // ★ ROBUST MAP INIT (With ResizeObserver) ★
+        const mapDiv = document.getElementById('map-container');
+        const resizeObserver = new ResizeObserver(() => {
+            if(state.map) state.map.invalidateSize();
+        });
+        resizeObserver.observe(mapDiv);
+
+        setTimeout(()=>{ if(!state.map) initMap(); else state.map.invalidateSize(); updateMap(); }, 300);
     }
 
-    // ★ DYNAMIC TEXT GENERATOR (Fixed) ★
     function getDynamicDesc(id) {
         if(state.lang !== 'ja') return "Your value map is unique. Explore the map to find your tribe.";
-        
         const parts = [];
-        // 1. Mud/Clean
-        if(id.includes("泥")) parts.push("飾らないリアルを求め、"); 
-        else parts.push("洗練された美を愛し、");
-        
-        // 2. Active/Safe
-        if(id.includes("攻")) parts.push("リスクを恐れず突き進む。"); 
-        else parts.push("心安らぐ瞬間を大切にする。");
-
-        // 3. Social/Solo
-        if(id.includes("共")) parts.push("人との繋がりを糧にし、"); 
-        else parts.push("孤独の中に自由を見出す。");
-
-        // 4. Flow/Order
-        if(id.includes("遊")) parts.push("予定調和を壊す旅人。"); 
-        else parts.push("緻密な計画が旅を彩る。");
-
+        if(id.includes("泥")) parts.push("飾らないリアルを求め、"); else parts.push("洗練された美を愛し、");
+        if(id.includes("攻")) parts.push("リスクを恐れず突き進む。"); else parts.push("心安らぐ瞬間を大切にする。");
+        if(id.includes("共")) parts.push("人との繋がりを糧にし、"); else parts.push("孤独の中に自由を見出す。");
+        if(id.includes("遊")) parts.push("予定調和を壊す旅人。"); else parts.push("緻密な計画が旅を彩る。");
         return parts.join("");
+    }
+
+    function toggleParams() {
+        const box = document.getElementById('param-box');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
     }
 
     function updateResultUI(){
         document.getElementById('res-kanji').innerText = `【 ${state.finalId} 】`;
         
-        // ★ MBTI ROLE FIX ★
         let mbtiText = `MBTI: ${state.mbti}`;
-        if(MBTI_ROLES[state.mbti] && state.lang === 'ja') {
-            mbtiText += `（${MBTI_ROLES[state.mbti]}）`;
-        }
+        if(MBTI_ROLES[state.mbti] && state.lang === 'ja') mbtiText += `（${MBTI_ROLES[state.mbti]}）`;
         document.getElementById('res-mbti').innerText = mbtiText;
         
         const img = document.getElementById('type-image');
         img.src = `./images/${state.finalId}.png`;
         img.onload = ()=>document.getElementById('img-container').style.display='block';
 
-        // Dynamic Title
         let title = "THE TRAVELER";
         if(state.finalId === "泥攻孤遊") title = "THE UNFILTERED EXPLORER";
         else if(state.finalId === "浄安共律") title = "THE AESTHETIC PLANNER";
@@ -404,7 +431,17 @@
         document.getElementById('res-id').innerText = title;
         document.getElementById('res-desc').innerText = getDynamicDesc(state.finalId);
         
-        // Update texts
+        // Update Bars
+        const calcPct = (a, b) => {
+            const total = (a + b) || 1;
+            return Math.round((b / total) * 100) + "%";
+        };
+        document.getElementById('bar-mud').style.width = calcPct(state.scores.mud, state.scores.clean);
+        document.getElementById('bar-active').style.width = calcPct(state.scores.active, state.scores.safe);
+        document.getElementById('bar-solo').style.width = calcPct(state.scores.solo, state.scores.social);
+        document.getElementById('bar-flow').style.width = calcPct(state.scores.flow, state.scores.order);
+
+        // Texts
         const t = T[state.lang];
         document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
         document.getElementById('t-sub').innerHTML = t.sub.replace('\n', '<br>');
@@ -414,15 +451,13 @@
         document.getElementById('opt-world').innerText = t.world;
         document.getElementById('opt-japan').innerText = t.japan;
         updateSaveBtn();
+        
+        if(state.map) updateMap();
     }
 
     const T = {
-        en: { 
-            head: "Decode Your\nTravel DNA.", sub: "We don't match you by demographics.\nWe match you by values.", start: "Analyze My Style", save: "Save", saved: "Saved!", vibe: "View Vibe", world: "Global", japan: "Domestic", discord: "Copy Profile for Discord", submit: "Submit Spot"
-        },
-        ja: {
-            head: "旅のDNAを\n解読する。", sub: "属性ではなく、\n「価値観」で世界を再定義する。", start: "スタイルを分析", save: "保存", saved: "保存完了", vibe: "動画を見る", world: "世界", japan: "日本", discord: "Discord用プロフをコピー", submit: "聖地をタレこむ"
-        }
+        en: { head: "Decode Your\nTravel DNA.", sub: "We don't match you by demographics.\nWe match you by values.", start: "Analyze My Style", save: "Save", saved: "Saved!", vibe: "View Vibe", world: "Global", japan: "Domestic", discord: "Copy Profile for Discord", submit: "Submit Spot" },
+        ja: { head: "旅のDNAを\n解読する。", sub: "属性ではなく、\n「価値観」で世界を再定義する。", start: "スタイルを分析", save: "保存", saved: "保存完了", vibe: "動画を見る", world: "世界", japan: "日本", discord: "Discord用プロフをコピー", submit: "聖地をタレこむ" }
     };
 
     function toggleLang(){
@@ -430,7 +465,6 @@
         document.getElementById('lang-btn').innerText = state.lang==='en'?"EN / JP":"JP / EN";
         if(state.finalId) updateResultUI(); else { updateUIText(); if(state.qIdx>0) renderQ(); }
     }
-    
     function updateUIText(){
         const t = T[state.lang];
         document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
@@ -449,20 +483,11 @@
         if(!state.map) return;
         state.markers.clearLayers();
         
-        // ★ CRITICAL FIX: Fallback to ALL spots if specific type missing ★
         let raw = state.data[state.finalId] || [];
-        if(raw.length === 0) {
-             console.log("No specific spots found. Showing all.");
-             raw = Object.values(state.data).flat();
-        }
+        if(raw.length === 0) raw = Object.values(state.data).flat();
 
         let spots = state.mode==='japan' ? raw.filter(s=>s.region==='japan') : raw.filter(s=>s.region==='world');
-        
-        // If still empty (e.g. data load failed), default view
-        if(spots.length===0) { 
-            state.map.setView([35.6895, 139.6917], 5); // Default Tokyo
-            return; 
-        }
+        if(spots.length===0) { state.map.setView([35.6895, 139.6917], 5); return; }
         
         const bounds = [];
         spots.forEach(s=>{
@@ -475,8 +500,6 @@
         });
         
         if(bounds.length > 0) state.map.fitBounds(bounds, {padding:[50,50]});
-        
-        // Auto select first
         if(spots.length > 0) showSpot(spots[0]);
     }
 
@@ -485,13 +508,8 @@
         document.getElementById('spot-name').innerText = state.lang==='ja'?s.name_jp:s.name_en;
         document.getElementById('spot-desc').innerText = s.desc || "Recommended";
         const btn = document.getElementById('btn-insta');
-        if(s.tag){ 
-            btn.href=`https://www.instagram.com/explore/tags/${s.tag}/`; 
-            btn.classList.remove('disabled');
-        } else { 
-            btn.href="javascript:void(0)"; 
-            btn.classList.add('disabled');
-        }
+        if(s.tag){ btn.href=`https://www.instagram.com/explore/tags/${s.tag}/`; btn.classList.remove('disabled'); } 
+        else { btn.href="javascript:void(0)"; btn.classList.add('disabled'); }
         updateSaveBtn();
     }
 
@@ -503,7 +521,6 @@
         localStorage.setItem('tid_saved', JSON.stringify([...state.saved]));
         saveProfile();
         updateSaveBtn();
-        // Update map icon to reflect save state
         updateMap(); 
     }
 
