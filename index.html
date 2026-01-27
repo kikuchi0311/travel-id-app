@@ -121,7 +121,7 @@
             <span id="t-start">Analyze My Style</span> <span>→</span>
         </button>
         <div style="margin-top:40px; border-top:1px solid #f1f5f9; padding-top:20px;">
-            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v36.0 (mazidekoregasaigo)</p>
+            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v36.0 (Map & Text Fixed)</p>
         </div>
     </section>
 
@@ -207,14 +207,14 @@
     // ★ SUPABASE CONFIG ★
     // ==========================================
     const SUPABASE_URL = 'https://zqghkzukkzmpszdxyqgf.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxZ2hrenVra3ptcHN6ZHh5cWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImV4cCI6MjA4NDc1NDY0Nn0.2-ng4M5LLMkTcQp5pqzg8INEQbDef1HQS4zxFWg_DXg';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxZ2hrenVra3ptcHN6ZHh5cWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImV4cCI6MjA4NDc1NDY0Nn0.2-ng4M5LLMkTcQp5pqzg8INEQbDef1HQS4zxFWg_DXg';
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrOI46FP-ueet2ZD0xKG0r1_xFng90_PDr1Z-sm6OB5xe3I8m0nx5Q5aNIVxvRVi1QLczBbv4pdnAv/pub?output=csv';
     // ==========================================
 
     const travelSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let state = { lang: 'en', mode: 'japan', finalId: "", mbti: "", map: null, markers: null, data: {}, saved: new Set(), qIdx: 0, scores: {mud:0, clean:0, flow:0, order:0, active:0, safe:0, solo:0, social:0}, user: null, curSpot: null };
 
-    // MBTI Roles
+    // MBTI Roles (Dictionary)
     const MBTI_ROLES = {
         "INTJ": "建築家", "INTP": "論理学者", "ENTJ": "指揮官", "ENTP": "討論者",
         "INFJ": "提唱者", "INFP": "仲介者", "ENFJ": "主人公", "ENFP": "運動家",
@@ -336,9 +336,7 @@
         const v = sel.value;
         if(!v) return alert("Select MBTI");
         
-        // Extract plain code (e.g., "INTJ") from value or use it directly
-        // The select value is just the code "INTJ", we handle label in UI logic
-        state.mbti = v;
+        state.mbti = v; // Store code (e.g. INTJ)
         
         if(v.includes('E')) state.scores.social += 2; if(v.includes('I')) state.scores.solo += 2;
         if(v.includes('J')) state.scores.order += 2; if(v.includes('P')) state.scores.flow += 2;
