@@ -35,7 +35,7 @@
         /* Login Modal */
         #login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 320px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .modal-input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; }
+        .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; }
 
         /* Header */
         .header { padding: 40px 24px 30px; position: relative; }
@@ -105,15 +105,16 @@
 <div class="container">
     <div class="auth-bar">
         <span id="user-display" class="auth-status">Guest Mode</span>
-        <button id="auth-action-btn" class="auth-btn" onclick="openLoginModal()">Login to Save</button>
+        <button id="auth-action-btn" class="auth-btn" onclick="openLoginModal()">Login / Sign Up</button>
     </div>
 
     <div id="login-modal" class="hidden">
         <div class="modal-content">
-            <h2 style="margin-top:0;">Log in / Sign up</h2>
-            <p style="font-size:12px; color:#666; margin-bottom:15px;">Enter email to receive a magic link.</p>
+            <h2 style="margin-top:0;">Login / Sign Up</h2>
+            <p style="font-size:12px; color:#666; margin-bottom:15px;">Enter email and password.</p>
             <input type="email" id="email-input" class="modal-input" placeholder="your@email.com">
-            <button class="btn-primary" onclick="handleLogin()" style="margin-top:10px;">Send Magic Link</button>
+            <input type="password" id="password-input" class="modal-input" placeholder="Password">
+            <button class="btn-primary" onclick="handleLogin()" style="margin-top:10px;">Login / Create Account</button>
             <button onclick="closeLoginModal()" style="background:none; border:none; color:#999; margin-top:20px; cursor:pointer; text-decoration:underline;">Cancel</button>
         </div>
     </div>
@@ -127,7 +128,7 @@
             <span id="t-start">Analyze My Style</span> <span>→</span>
         </button>
         <div style="margin-top:40px; border-top:1px solid #f1f5f9; padding-top:20px;">
-            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v39.0 (Stable Release)</p>
+            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v40.0 (Password Login)</p>
         </div>
     </section>
 
@@ -233,7 +234,7 @@
     // ★ SUPABASE CONFIG ★
     // ==========================================
     const SUPABASE_URL = 'https://zqghkzukkzmpszdxyqgf.supabase.co'.trim();
-    // Aggressive whitespace removal for key
+    // Aggressive whitespace removal
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxZ2hrenVra3ptcHN6ZHh5cWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImV4cCI6MjA4NDc1NDY0Nn0.2-ng4M5LLMkTcQp5pqzg8INEQbDef1HQS4zxFWg_DXg'.replace(/\s/g, '');
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrOI46FP-ueet2ZD0xKG0r1_xFng90_PDr1Z-sm6OB5xe3I8m0nx5Q5aNIVxvRVi1QLczBbv4pdnAv/pub?output=csv';
     // ==========================================
@@ -274,18 +275,40 @@
             await loadProfile(); 
         }
     }
+    
+    // ★ NEW LOGIN LOGIC (PASSWORD SUPPORT) ★
     async function handleLogin() {
         const email = document.getElementById('email-input').value.trim();
-        if (!email) return alert("Enter email");
-        const { error } = await travelSupabase.auth.signInWithOtp({ email });
-        if (error) alert("Error: " + error.message);
-        else alert("Magic Link sent!");
-        closeLoginModal();
+        const password = document.getElementById('password-input').value.trim();
+        
+        if (!email || !password) return alert("Please enter both email and password.");
+        
+        // 1. Try to login
+        const { data, error } = await travelSupabase.auth.signInWithPassword({ email, password });
+        
+        if (error) {
+            // 2. If login failed, try to SIGN UP instead
+            console.log("Login failed, trying signup...", error.message);
+            const { data: upData, error: upError } = await travelSupabase.auth.signUp({ email, password });
+            
+            if (upError) {
+                alert("Error: " + upError.message);
+            } else {
+                alert("Account created and Logged in!");
+                closeLoginModal();
+                checkUser();
+            }
+        } else {
+            alert("Logged in successfully!");
+            closeLoginModal();
+            checkUser();
+        }
     }
+
     async function handleLogout() { await travelSupabase.auth.signOut(); location.reload(); }
     function updateAuthUI() {
         if (state.user) {
-            document.getElementById('user-display').innerText = "Logged in";
+            document.getElementById('user-display').innerText = state.user.email; // Show email
             const b = document.getElementById('auth-action-btn');
             b.innerText = "Logout"; b.onclick = handleLogout;
         }
@@ -530,7 +553,6 @@
         else { btn.classList.remove('saved'); btn.innerHTML = '♡ Save'; }
     }
 
-    // Modal & Shares
     function openLoginModal(){ document.getElementById('login-modal').classList.remove('hidden'); }
     function closeLoginModal(){ document.getElementById('login-modal').classList.add('hidden'); }
     function copyDiscordProfile() {
