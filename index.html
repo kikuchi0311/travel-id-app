@@ -6,16 +6,15 @@
     <title>Travel ID - Value Segmentation</title>
     <link rel="icon" href="./images/logo.png">
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
     <style>
@@ -86,7 +85,7 @@
         .act-btn { flex: 1; padding: 14px; border-radius: 12px; border: 1px solid var(--border); text-align: center; font-weight: 700; cursor: pointer; font-size: 13px; color: var(--primary); display: flex; justify-content: center; align-items: center; gap: 6px; text-decoration: none;}
         .act-save.saved { background: var(--pink); color: white; border-color: var(--pink); animation: pop 0.4s ease; }
         .act-vibe { background: var(--primary); color: white; border-color: var(--primary); }
-        .act-vibe.disabled { opacity: 0.5; pointer-events: none; background: #eee; border-color: #eee; color: #999; }
+        .act-vibe.disabled { opacity: 0.5; pointer-events: none; background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; }
         
         @keyframes pop { 50% { transform: scale(1.1); } }
         
@@ -122,7 +121,7 @@
             <span id="t-start">Analyze My Style</span> <span>→</span>
         </button>
         <div style="margin-top:40px; border-top:1px solid #f1f5f9; padding-top:20px;">
-            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v35.0 (Final Polish)</p>
+            <p style="font-size:11px; color:#9ca3af; line-height:1.5;">v36.0 (mazidekoregasaigo)</p>
         </div>
     </section>
 
@@ -141,10 +140,22 @@
         <p style="margin-bottom:20px; font-size:14px; color:#666;">What is your MBTI?</p>
         <select id="mbti-select" style="width:100%; padding:16px; border-radius:12px; border:2px solid #e2e8f0; font-size:16px; font-weight:700; margin-bottom:20px; background:white;">
             <option value="" disabled selected>Select MBTI</option>
-            <option value="INTJ">INTJ</option><option value="INTP">INTP</option><option value="ENTJ">ENTJ</option><option value="ENTP">ENTP</option>
-            <option value="INFJ">INFJ</option><option value="INFP">INFP</option><option value="ENFJ">ENFJ</option><option value="ENFP">ENFP</option>
-            <option value="ISTJ">ISTJ</option><option value="ISFJ">ISFJ</option><option value="ESTJ">ESTJ</option><option value="ESFJ">ESFJ</option>
-            <option value="ISTP">ISTP</option><option value="ISFP">ISFP</option><option value="ESTP">ESTP</option><option value="ESFP">ESFP</option>
+            <option value="INTJ">INTJ (建築家)</option>
+            <option value="INTP">INTP (論理学者)</option>
+            <option value="ENTJ">ENTJ (指揮官)</option>
+            <option value="ENTP">ENTP (討論者)</option>
+            <option value="INFJ">INFJ (提唱者)</option>
+            <option value="INFP">INFP (仲介者)</option>
+            <option value="ENFJ">ENFJ (主人公)</option>
+            <option value="ENFP">ENFP (運動家)</option>
+            <option value="ISTJ">ISTJ (管理者)</option>
+            <option value="ISFJ">ISFJ (擁護者)</option>
+            <option value="ESTJ">ESTJ (幹部)</option>
+            <option value="ESFJ">ESFJ (領事官)</option>
+            <option value="ISTP">ISTP (巨匠)</option>
+            <option value="ISFP">ISFP (冒険家)</option>
+            <option value="ESTP">ESTP (起業家)</option>
+            <option value="ESFP">ESFP (エンターテイナー)</option>
             <option value="UNKNOWN">I don't know</option>
         </select>
         <button class="btn-primary" onclick="submitMBTI()">
@@ -158,10 +169,13 @@
             <div id="res-kanji" class="id-kanji">【 】</div>
             <h2 id="res-id" class="id-title">LOADING</h2>
             <div id="res-mbti" class="id-mbti">MBTI</div>
+            
             <div id="img-container" style="max-width:200px; margin:0 auto 15px; border-radius:12px; overflow:hidden; display:none;">
                 <img id="type-image" style="width:100%; display:block;" src="" onerror="this.parentElement.style.display='none'">
             </div>
+
             <p id="res-desc" class="id-desc">Analysis complete.</p>
+            
             <div class="tribe-actions">
                 <button class="tribe-btn discord" onclick="copyDiscordProfile()">📋 Copy Profile for Discord</button>
                 <a href="https://forms.gle/5L7ndRzgPnh45Mor8" target="_blank" class="tribe-btn">⚡ Submit Spot</a>
@@ -179,7 +193,7 @@
 
         <div class="spot-card">
             <h3 id="spot-name" class="spot-n">Map Loading...</h3>
-            <p id="spot-desc" class="spot-d">Select a pin to reveal spots.</p>
+            <p id="spot-desc" class="spot-d">Select a pin.</p>
             <div class="actions">
                 <button id="btn-save" class="act-btn act-save" onclick="toggleSave()">♡ Save</button>
                 <a id="btn-insta" href="javascript:void(0)" target="_blank" class="act-btn act-vibe disabled">▶ Vibe</a>
@@ -194,16 +208,20 @@
     // ==========================================
     const SUPABASE_URL = 'https://zqghkzukkzmpszdxyqgf.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxZ2hrenVra3ptcHN6ZHh5cWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxNzg2NDYsImV4cCI6MjA4NDc1NDY0Nn0.2-ng4M5LLMkTcQp5pqzg8INEQbDef1HQS4zxFWg_DXg';
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrOI46FP-ueet2ZD0xKG0r1_xFng90_PDr1Z-sm6OB5xe3I8m0nx5Q5aNIVxvRVi1QLczBbv4pdnAv/pub?output=csv';
     // ==========================================
 
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrOI46FP-ueet2ZD0xKG0r1_xFng90_PDr1Z-sm6OB5xe3I8m0nx5Q5aNIVxvRVi1QLczBbv4pdnAv/pub?output=csv';
-    
-    // Prevent variable collision
     const travelSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let state = { lang: 'en', mode: 'japan', finalId: "", mbti: "", map: null, markers: null, data: {}, saved: new Set(), qIdx: 0, scores: {mud:0, clean:0, flow:0, order:0, active:0, safe:0, solo:0, social:0}, user: null, curSpot: null };
 
-    let state = { lang: 'en', mode: 'japan', finalId: "", mbti: "", map: null, markers: [], data: {}, saved: new Set(), qIdx: 0, scores: {mud:0, clean:0, flow:0, order:0, active:0, safe:0, solo:0, social:0}, user: null, curSpot: null };
+    // MBTI Roles
+    const MBTI_ROLES = {
+        "INTJ": "建築家", "INTP": "論理学者", "ENTJ": "指揮官", "ENTP": "討論者",
+        "INFJ": "提唱者", "INFP": "仲介者", "ENFJ": "主人公", "ENFP": "運動家",
+        "ISTJ": "管理者", "ISFJ": "擁護者", "ESTJ": "幹部", "ESFJ": "領事官",
+        "ISTP": "巨匠", "ISFP": "冒険家", "ESTP": "起業家", "ESFP": "エンターテイナー"
+    };
 
-    // Questions
     const Q = [
         { cat: "ENVIRONMENT", ja: "絶景が見られるなら、不衛生な小屋に泊まることも厭わない。", en: "I would stay in a dirty hut if it meant seeing a spectacular view.", pos:{mud:2}, neg:{clean:2} },
         { cat: "CONSUMPTION", ja: "リスクがあっても、得体の知れない現地の屋台料理を食べてみたい。", en: "I am willing to eat mysterious local street food despite the risks.", pos:{mud:2}, neg:{clean:2} },
@@ -220,30 +238,7 @@
         { cat: "CORE", ja: "私にとって旅とは「日常の回復」ではなく「価値観の破壊」だ。", en: "To me, travel is about destroying values, not restoring daily life.", pos:{active:2,mud:1}, neg:{safe:2,clean:1} }
     ];
 
-    const T = {
-        en: { 
-            head: "Decode Your\nTravel DNA.", sub: "We don't match you by demographics.\nWe match you by values.", start: "Analyze My Style", save: "Save", saved: "Saved!", vibe: "View Vibe", world: "Global", japan: "Domestic", discord: "Copy Profile for Discord", submit: "Submit Spot",
-            types: {
-                "泥攻孤遊": { t: "The Unfiltered Explorer", d: "Raw × Intense × Solo × Spontaneous.\nA nomad who seeks truth over comfort. You find beauty in the chaos that others reject." },
-                "浄安共律": { t: "The Aesthetic Planner", d: "Refined × Gentle × Social × Structured.\nA guardian of beauty. You curate perfect harmony and reject the noise of the world." },
-                "泥安共遊": { t: "The Immersion Seeker", d: "Raw × Gentle × Social × Spontaneous.\nA connector of souls. You dive into local life with an open heart and zero judgement." },
-                "浄攻孤律": { t: "The Noble Sniper", d: "Refined × Intense × Solo × Structured.\nA stoic perfectionist. You don't tour; you hunt for the sublime moment in solitude." },
-                "fallback": { t: "The Unique Voyager", d: "Your value map is unique. Explore the map to find your tribe." }
-            }
-        },
-        ja: {
-            head: "旅のDNAを\n解読する。", sub: "属性ではなく、\n「価値観」で世界を再定義する。", start: "スタイルを分析", save: "保存", saved: "保存完了", vibe: "動画を見る", world: "世界", japan: "日本", discord: "Discord用プロフをコピー", submit: "聖地をタレこむ",
-            types: {
-                "泥攻孤遊": { t: "The Unfiltered Explorer", d: "【Raw × Intense × Solo × Spontaneous】\n飾らない探究者。安全な飼育小屋より、傷だらけの荒野を選ぶ。カオスの中にこそ「生」がある。" },
-                "浄安共律": { t: "The Aesthetic Planner", d: "【Refined × Gentle × Social × Structured】\n美学ある計画者。ノイズを徹底して排除し、地上に完璧な楽園（サンクチュアリ）を設計する。" },
-                "泥安共遊": { t: "The Immersion Seeker", d: "【Raw × Gentle × Social × Spontaneous】\n没入する人。清濁併せ呑む最強の免疫力で、どんな路地裏にも「愛」を見つけ出す。" },
-                "浄攻孤律": { t: "The Noble Sniper", d: "【Refined × Intense × Solo × Structured】\n孤高の狙撃手。妥協なき美意識。あなたがするのは観光ではない、美を撃ち抜く「狩り」だ。" },
-                "fallback": { t: "The Unique Voyager", d: "独自の旅のスタイルを持っています。マップを探索して、あなたのトライド（部族）を見つけましょう。" }
-            }
-        }
-    };
-
-    // --- AUTH LOGIC ---
+    // --- LOGIC: AUTH ---
     async function checkUser() {
         const { data: { session } } = await travelSupabase.auth.getSession();
         if (session) {
@@ -252,53 +247,35 @@
             await loadProfile(); 
         }
     }
-
     async function handleLogin() {
         const email = document.getElementById('email-input').value;
         if (!email) return alert("Enter email");
         const { error } = await travelSupabase.auth.signInWithOtp({ email });
         if (error) alert("Error: " + error.message);
-        else alert("Magic Link sent! Check your email to login.");
+        else alert("Magic Link sent!");
         closeLoginModal();
     }
-
-    async function handleLogout() {
-        await travelSupabase.auth.signOut();
-        location.reload();
-    }
-
+    async function handleLogout() { await travelSupabase.auth.signOut(); location.reload(); }
     function updateAuthUI() {
-        const d = document.getElementById('user-display');
-        const b = document.getElementById('auth-action-btn');
         if (state.user) {
-            d.innerText = "Logged in";
-            b.innerText = "Logout";
-            b.onclick = handleLogout;
+            document.getElementById('user-display').innerText = "Logged in";
+            const b = document.getElementById('auth-action-btn');
+            b.innerText = "Logout"; b.onclick = handleLogout;
         }
     }
-
     async function saveProfile() {
         if (!state.user) return;
-        const updates = {
-            id: state.user.id,
-            updated_at: new Date(),
-            saved_spots: Array.from(state.saved),
-            final_id: state.finalId,
-            mbti: state.mbti
-        };
-        await travelSupabase.from('profiles').upsert(updates);
+        await travelSupabase.from('profiles').upsert({
+            id: state.user.id, updated_at: new Date(), saved_spots: Array.from(state.saved), final_id: state.finalId, mbti: state.mbti
+        });
     }
-
     async function loadProfile() {
         if (!state.user) return;
         const { data } = await travelSupabase.from('profiles').select('*').eq('id', state.user.id).single();
-        if (data && data.saved_spots) {
-            state.saved = new Set(data.saved_spots);
-            if (state.map) updateMap();
-        }
+        if (data && data.saved_spots) { state.saved = new Set(data.saved_spots); if (state.map) updateMap(); }
     }
 
-    // --- APP LOGIC ---
+    // --- LOGIC: APP ---
     document.addEventListener('DOMContentLoaded', () => { init(); });
 
     function init(){
@@ -310,12 +287,8 @@
         const sharedId = urlParams.get('id');
 
         fetchData(() => {
-            if(sharedId) {
-                state.finalId = sharedId;
-                showResultScreen();
-            } else {
-                updateUIText();
-            }
+            if(sharedId) { state.finalId = sharedId; showResultScreen(); } 
+            else { updateUIText(); }
         });
     }
 
@@ -326,8 +299,7 @@
                     const k = r.id.trim();
                     if(!state.data[k]) state.data[k] = [];
                     state.data[k].push({
-                        uid: r.uid || Math.random().toString(),
-                        name_jp: r.rec_jp, name_en: r.rec_en, desc: r.desc, tag: r.tag,
+                        uid: r.uid || Math.random().toString(), name_jp: r.rec_jp, name_en: r.rec_en, desc: r.desc, tag: r.tag ? r.tag.trim() : "",
                         lat: parseFloat(r.lat), lng: parseFloat(r.lng), zoom: parseInt(r.zoom)||12, region: r.region?r.region.trim():'japan'
                     });
                 }
@@ -360,50 +332,81 @@
     function prevQ(){ if(state.qIdx > 0){ state.qIdx--; renderQ(); } else { location.reload(); } }
 
     function submitMBTI(){
-        state.mbti = document.getElementById('mbti-select').value;
-        if(!state.mbti) return alert("Select MBTI");
-        if(state.mbti.includes('E')) state.scores.social += 2;
-        if(state.mbti.includes('I')) state.scores.solo += 2;
-        if(state.mbti.includes('J')) state.scores.order += 2;
-        if(state.mbti.includes('P')) state.scores.flow += 2;
+        const sel = document.getElementById('mbti-select');
+        const v = sel.value;
+        if(!v) return alert("Select MBTI");
         
-        const axis1 = state.scores.mud >= state.scores.clean ? "泥" : "浄";
-        const axis2 = state.scores.active >= state.scores.safe ? "攻" : "安";
-        const axis3 = state.scores.social >= state.scores.solo ? "共" : "孤";
-        const axis4 = state.scores.flow >= state.scores.order ? "遊" : "律";
-        state.finalId = axis1+axis2+axis3+axis4;
+        // Extract plain code (e.g., "INTJ") from value or use it directly
+        // The select value is just the code "INTJ", we handle label in UI logic
+        state.mbti = v;
         
+        if(v.includes('E')) state.scores.social += 2; if(v.includes('I')) state.scores.solo += 2;
+        if(v.includes('J')) state.scores.order += 2; if(v.includes('P')) state.scores.flow += 2;
+        
+        state.finalId = (state.scores.mud>=state.scores.clean?"泥":"浄") + (state.scores.active>=state.scores.safe?"攻":"安") + (state.scores.social>=state.scores.solo?"共":"孤") + (state.scores.flow>=state.scores.order?"遊":"律");
         document.getElementById('mbti-screen').classList.add('hidden');
         showResultScreen();
         saveProfile();
     }
 
+    // --- RESULT & MAP LOGIC ---
     function showResultScreen(){
         document.getElementById('result-screen').classList.remove('hidden');
         updateResultUI();
-        // ★ CRITICAL FIX: Ensure map resizes AFTER transition
-        setTimeout(()=>{ if(!state.map) initMap(); else state.map.invalidateSize(); updateMap(); }, 300);
+        // ★ MAP FIX: Wait for transition & Force show all if empty
+        setTimeout(()=>{ if(!state.map) initMap(); else state.map.invalidateSize(); updateMap(); }, 500);
+    }
+
+    // ★ DYNAMIC TEXT GENERATOR (Fixed) ★
+    function getDynamicDesc(id) {
+        if(state.lang !== 'ja') return "Your value map is unique. Explore the map to find your tribe.";
+        
+        const parts = [];
+        // 1. Mud/Clean
+        if(id.includes("泥")) parts.push("飾らないリアルを求め、"); 
+        else parts.push("洗練された美を愛し、");
+        
+        // 2. Active/Safe
+        if(id.includes("攻")) parts.push("リスクを恐れず突き進む。"); 
+        else parts.push("心安らぐ瞬間を大切にする。");
+
+        // 3. Social/Solo
+        if(id.includes("共")) parts.push("人との繋がりを糧にし、"); 
+        else parts.push("孤独の中に自由を見出す。");
+
+        // 4. Flow/Order
+        if(id.includes("遊")) parts.push("予定調和を壊す旅人。"); 
+        else parts.push("緻密な計画が旅を彩る。");
+
+        return parts.join("");
     }
 
     function updateResultUI(){
         document.getElementById('res-kanji').innerText = `【 ${state.finalId} 】`;
-        document.getElementById('res-mbti').innerText = `MBTI: ${state.mbti}`;
+        
+        // ★ MBTI ROLE FIX ★
+        let mbtiText = `MBTI: ${state.mbti}`;
+        if(MBTI_ROLES[state.mbti] && state.lang === 'ja') {
+            mbtiText += `（${MBTI_ROLES[state.mbti]}）`;
+        }
+        document.getElementById('res-mbti').innerText = mbtiText;
         
         const img = document.getElementById('type-image');
         img.src = `./images/${state.finalId}.png`;
         img.onload = ()=>document.getElementById('img-container').style.display='block';
 
-        let tData = T[state.lang].types[state.finalId];
-        if(!tData) {
-            if(state.finalId.includes("泥") && state.finalId.includes("攻")) tData = T[state.lang].types["泥攻孤遊"];
-            else if(state.finalId.includes("浄") && state.finalId.includes("安")) tData = T[state.lang].types["浄安共律"];
-            else if(state.finalId.includes("泥") && state.finalId.includes("共")) tData = T[state.lang].types["泥安共遊"];
-            else if(state.finalId.includes("浄") && state.finalId.includes("攻")) tData = T[state.lang].types["浄攻孤律"];
-            else tData = T[state.lang].types["fallback"];
-        }
-        document.getElementById('res-id').innerText = tData.t;
-        document.getElementById('res-desc').innerText = tData.d;
+        // Dynamic Title
+        let title = "THE TRAVELER";
+        if(state.finalId === "泥攻孤遊") title = "THE UNFILTERED EXPLORER";
+        else if(state.finalId === "浄安共律") title = "THE AESTHETIC PLANNER";
+        else if(state.finalId === "泥安共遊") title = "THE IMMERSION SEEKER";
+        else if(state.finalId === "浄攻孤律") title = "THE NOBLE SNIPER";
+        else title = "THE UNIQUE VOYAGER";
+
+        document.getElementById('res-id').innerText = title;
+        document.getElementById('res-desc').innerText = getDynamicDesc(state.finalId);
         
+        // Update texts
         const t = T[state.lang];
         document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
         document.getElementById('t-sub').innerHTML = t.sub.replace('\n', '<br>');
@@ -412,22 +415,22 @@
         document.querySelector('a[href*="forms"]').innerText = "⚡ " + t.submit;
         document.getElementById('opt-world').innerText = t.world;
         document.getElementById('opt-japan').innerText = t.japan;
-        document.getElementById('btn-save').innerHTML = state.saved.has(state.curSpot?.uid) ? '♥ Saved' : '♡ ' + t.save;
-        document.getElementById('btn-insta').innerText = '▶ ' + t.vibe;
-        
-        if(state.map) updateMap();
+        updateSaveBtn();
     }
+
+    const T = {
+        en: { 
+            head: "Decode Your\nTravel DNA.", sub: "We don't match you by demographics.\nWe match you by values.", start: "Analyze My Style", save: "Save", saved: "Saved!", vibe: "View Vibe", world: "Global", japan: "Domestic", discord: "Copy Profile for Discord", submit: "Submit Spot"
+        },
+        ja: {
+            head: "旅のDNAを\n解読する。", sub: "属性ではなく、\n「価値観」で世界を再定義する。", start: "スタイルを分析", save: "保存", saved: "保存完了", vibe: "動画を見る", world: "世界", japan: "日本", discord: "Discord用プロフをコピー", submit: "聖地をタレこむ"
+        }
+    };
 
     function toggleLang(){
         state.lang = state.lang==='en'?'ja':'en';
         document.getElementById('lang-btn').innerText = state.lang==='en'?"EN / JP":"JP / EN";
-        if(state.finalId) updateResultUI(); else {
-            const t = T[state.lang];
-            document.getElementById('t-head').innerHTML = t.head.replace('\n', '<br>');
-            document.getElementById('t-sub').innerHTML = t.sub.replace('\n', '<br>');
-            document.getElementById('t-start').innerText = t.start;
-            if(state.qIdx>0) renderQ();
-        }
+        if(state.finalId) updateResultUI(); else { updateUIText(); if(state.qIdx>0) renderQ(); }
     }
     
     function updateUIText(){
@@ -437,37 +440,45 @@
         document.getElementById('t-start').innerText = t.start;
     }
 
-    // Map
     function initMap(){
         state.map = L.map('map');
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {attribution:'&copy; CARTO', maxZoom:19}).addTo(state.map);
+        state.markers = L.markerClusterGroup({ maxClusterRadius: 50, spiderfyOnMaxZoom: true });
+        state.map.addLayer(state.markers);
     }
 
     function updateMap(){
         if(!state.map) return;
-        state.map.eachLayer(l => { if(l instanceof L.Marker) state.map.removeLayer(l); });
+        state.markers.clearLayers();
         
+        // ★ CRITICAL FIX: Fallback to ALL spots if specific type missing ★
         let raw = state.data[state.finalId] || [];
-        if(raw.length===0) {
-             const keys = Object.keys(state.data);
-             for(let k of keys){ if(state.finalId.includes(k.substring(0,2))) { raw = state.data[k]; break; } }
-             if(raw.length===0) raw = Object.values(state.data).flat();
+        if(raw.length === 0) {
+             console.log("No specific spots found. Showing all.");
+             raw = Object.values(state.data).flat();
         }
+
         let spots = state.mode==='japan' ? raw.filter(s=>s.region==='japan') : raw.filter(s=>s.region==='world');
         
-        if(spots.length===0) { state.map.setView([35,135], 5); return; }
+        // If still empty (e.g. data load failed), default view
+        if(spots.length===0) { 
+            state.map.setView([35.6895, 139.6917], 5); // Default Tokyo
+            return; 
+        }
         
         const bounds = [];
         spots.forEach(s=>{
             const isSaved = state.saved.has(s.uid);
             const icon = L.divIcon({className:'', html:`<img src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png" class="leaflet-marker-icon ${isSaved?'pin-sav':'pin-sys'}" style="margin-left:-12px; margin-top:-41px;">`});
-            const m = L.marker([s.lat, s.lng], {icon:icon}).addTo(state.map);
+            const m = L.marker([s.lat, s.lng], {icon:icon});
             m.on('click', ()=>showSpot(s));
+            state.markers.addLayer(m);
             bounds.push([s.lat, s.lng]);
         });
-        state.map.fitBounds(bounds, {padding:[50,50]});
         
-        // ★ AUTO SELECT FIRST SPOT ★
+        if(bounds.length > 0) state.map.fitBounds(bounds, {padding:[50,50]});
+        
+        // Auto select first
         if(spots.length > 0) showSpot(spots[0]);
     }
 
@@ -476,7 +487,6 @@
         document.getElementById('spot-name').innerText = state.lang==='ja'?s.name_jp:s.name_en;
         document.getElementById('spot-desc').innerText = s.desc || "Recommended";
         const btn = document.getElementById('btn-insta');
-        // Enable/Disable Vibe Button
         if(s.tag){ 
             btn.href=`https://www.instagram.com/explore/tags/${s.tag}/`; 
             btn.classList.remove('disabled');
@@ -489,12 +499,14 @@
 
     function toggleSave(){
         if(!state.curSpot) return;
+        if(!state.user && !confirm("Guest Mode: Data may be lost. Login to save?")) return;
         const k = state.curSpot.uid;
         if(state.saved.has(k)) state.saved.delete(k); else state.saved.add(k);
         localStorage.setItem('tid_saved', JSON.stringify([...state.saved]));
         saveProfile();
         updateSaveBtn();
-        updateMap();
+        // Update map icon to reflect save state
+        updateMap(); 
     }
 
     function updateSaveBtn(){
@@ -502,19 +514,16 @@
         const saved = state.saved.has(state.curSpot.uid);
         const btn = document.getElementById('btn-save');
         const t = T[state.lang];
-        if(saved) { btn.classList.add('saved'); btn.innerHTML = '♥ ' + t.saved; }
-        else { btn.classList.remove('saved'); btn.innerHTML = '♡ ' + t.save; }
+        if(saved) { btn.classList.add('saved'); btn.innerHTML = '♥ Saved'; }
+        else { btn.classList.remove('saved'); btn.innerHTML = '♡ Save'; }
     }
 
     // Modal & Shares
     function openLoginModal(){ document.getElementById('login-modal').classList.remove('hidden'); }
     function closeLoginModal(){ document.getElementById('login-modal').classList.add('hidden'); }
-    
     function copyDiscordProfile() {
-        const tData = T[state.lang].types[state.finalId] || T[state.lang].types["fallback"];
-        let recSpot = "Not selected";
-        if(state.data[state.finalId] && state.data[state.finalId].length > 0) recSpot = state.data[state.finalId][0].name_jp;
-        const text = `**【${state.finalId}】 (${tData.t})**\n**MBTI: ${state.mbti}**\n${tData.d}\n\n📍 Recommended: ${recSpot}\n#TravelID\n${window.location.href}`;
+        let recSpot = state.curSpot ? (state.lang==='ja'?state.curSpot.name_jp:state.curSpot.name_en) : "Anywhere";
+        const text = `**【${state.finalId}】**\n**MBTI: ${state.mbti}**\n${document.getElementById('res-desc').innerText}\n\n📍 Recommended: ${recSpot}\n#TravelID\n${window.location.href}`;
         navigator.clipboard.writeText(text).then(() => alert("Profile copied!"));
     }
     function shareUrl() {
@@ -522,12 +531,10 @@
         navigator.clipboard.writeText(url).then(() => alert("URL Copied!"));
     }
     function shareTwitter() {
-        const tData = T[state.lang].types[state.finalId] || T[state.lang].types["fallback"];
-        const text = `I am "${tData.t}" (${state.mbti}). My Travel ID is 【${state.finalId}】. #TravelID`;
+        const text = `I am "${state.finalId}" (${state.mbti}). #TravelID`;
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
     }
     function setMode(m){ state.mode=m; document.getElementById('opt-japan').classList.toggle('active', m==='japan'); document.getElementById('opt-world').classList.toggle('active', m==='world'); updateMap(); }
-
 </script>
 </body>
 </html>
